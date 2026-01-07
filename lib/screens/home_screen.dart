@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'login_screen.dart';
 import 'profile_screen.dart';
+import 'register_akshaya_screen.dart';
 import '../widgets/homepage_navbar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -479,10 +480,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  Widget _buildRegisterContent() {
+    // Navigate to Register Akshaya Screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_currentIndex == 1) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const RegisterAkshayaScreen()),
+        ).then((_) {
+          // Reset to home tab when returning from register
+          setState(() {
+            _currentIndex = 0;
+          });
+        });
+      }
+    });
+    
+    return Container(
+      color: Colors.white,
+      child: const Center(
+        child: CircularProgressIndicator(
+          color: Color(0xFF9C27B0),
+        ),
+      ),
+    );
+  }
+
   Widget _buildProfileContent() {
     // Navigate to dedicated ProfileScreen
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_currentIndex == 1) {
+      if (_currentIndex == 2) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const ProfileScreen()),
@@ -507,8 +534,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    Widget currentContent;
+    switch (_currentIndex) {
+      case 0:
+        currentContent = _buildHomeContent();
+        break;
+      case 1:
+        currentContent = _buildRegisterContent();
+        break;
+      case 2:
+        currentContent = _buildProfileContent();
+        break;
+      default:
+        currentContent = _buildHomeContent();
+    }
+    
     return Scaffold(
-      body: _currentIndex == 0 ? _buildHomeContent() : _buildProfileContent(),
+      body: currentContent,
       bottomNavigationBar: HomePageNavBar(
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
