@@ -10,13 +10,11 @@ class RegisterAkshayaScreen extends StatefulWidget {
 }
 
 class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with SingleTickerProviderStateMixin {
-  // 3D Form Color Scheme (matching signup screen)
-  static const Color color1 = Color(0xFFD8DAF7);
-  static const Color color2 = Color(0xFFC2C5F3);
-  static const Color color3 = Color(0xFFADB1EF);
-  static const Color color4 = Color(0xFF989DEB);
-  static const Color color5 = Color(0xFF6D74E3);
-  static const Color buttonColor = Color(0xFF575CB5);
+  // Modern Color Scheme
+  static const Color primaryPurple = Color(0xFF9C27B0);
+  static const Color lightPurple = Color(0xFFE1BEE7);
+  static const Color darkPurple = Color(0xFF7B1FA2);
+  static const Color accentColor = Color(0xFFBA68C8);
   
   final _formKey = GlobalKey<FormState>();
   final _centreNameController = TextEditingController();
@@ -29,89 +27,22 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
   final _contactPhoneController = TextEditingController();
   final _contactEmailController = TextEditingController();
   
-  final _centreNameFocusNode = FocusNode();
-  final _registrationNumberFocusNode = FocusNode();
-  final _addressFocusNode = FocusNode();
-  final _cityFocusNode = FocusNode();
-  final _stateFocusNode = FocusNode();
-  final _pinCodeFocusNode = FocusNode();
-  final _contactPersonFocusNode = FocusNode();
-  final _contactPhoneFocusNode = FocusNode();
-  final _contactEmailFocusNode = FocusNode();
-  
   bool _isLoading = false;
-  
-  // Hover states for 3D effect
-  bool _centreNameHover = false;
-  bool _registrationNumberHover = false;
-  bool _addressHover = false;
-  bool _cityHover = false;
-  bool _stateHover = false;
-  bool _pinCodeHover = false;
-  bool _contactPersonHover = false;
-  bool _contactPhoneHover = false;
-  bool _contactEmailHover = false;
-  bool _buttonHover = false;
-  
-  // Focus states for drawer animation
-  bool _centreNameFocused = false;
-  bool _registrationNumberFocused = false;
-  bool _addressFocused = false;
-  bool _cityFocused = false;
-  bool _stateFocused = false;
-  bool _pinCodeFocused = false;
-  bool _contactPersonFocused = false;
-  bool _contactPhoneFocused = false;
-  bool _contactEmailFocused = false;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _centreNameFocusNode.addListener(() {
-      setState(() {
-        _centreNameFocused = _centreNameFocusNode.hasFocus;
-      });
-    });
-    _registrationNumberFocusNode.addListener(() {
-      setState(() {
-        _registrationNumberFocused = _registrationNumberFocusNode.hasFocus;
-      });
-    });
-    _addressFocusNode.addListener(() {
-      setState(() {
-        _addressFocused = _addressFocusNode.hasFocus;
-      });
-    });
-    _cityFocusNode.addListener(() {
-      setState(() {
-        _cityFocused = _cityFocusNode.hasFocus;
-      });
-    });
-    _stateFocusNode.addListener(() {
-      setState(() {
-        _stateFocused = _stateFocusNode.hasFocus;
-      });
-    });
-    _pinCodeFocusNode.addListener(() {
-      setState(() {
-        _pinCodeFocused = _pinCodeFocusNode.hasFocus;
-      });
-    });
-    _contactPersonFocusNode.addListener(() {
-      setState(() {
-        _contactPersonFocused = _contactPersonFocusNode.hasFocus;
-      });
-    });
-    _contactPhoneFocusNode.addListener(() {
-      setState(() {
-        _contactPhoneFocused = _contactPhoneFocusNode.hasFocus;
-      });
-    });
-    _contactEmailFocusNode.addListener(() {
-      setState(() {
-        _contactEmailFocused = _contactEmailFocusNode.hasFocus;
-      });
-    });
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    _animationController.forward();
   }
 
   @override
@@ -125,16 +56,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
     _contactPersonController.dispose();
     _contactPhoneController.dispose();
     _contactEmailController.dispose();
-    
-    _centreNameFocusNode.dispose();
-    _registrationNumberFocusNode.dispose();
-    _addressFocusNode.dispose();
-    _cityFocusNode.dispose();
-    _stateFocusNode.dispose();
-    _pinCodeFocusNode.dispose();
-    _contactPersonFocusNode.dispose();
-    _contactPhoneFocusNode.dispose();
-    _contactEmailFocusNode.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -200,549 +122,395 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE8E8E8),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFE8E8E8),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: color5),
-          onPressed: () => Navigator.of(context).pop(),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              primaryPurple.withOpacity(0.1),
+              lightPurple.withOpacity(0.2),
+              Colors.white,
+            ],
+          ),
         ),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 20),
-                // Modern Header with Animation
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.0, end: 1.0),
-                  duration: const Duration(milliseconds: 800),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 50 * (1 - value.clamp(0.0, 1.0))),
-                      child: Opacity(
-                        opacity: value.clamp(0.0, 1.0),
-                        child: child,
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Custom App Bar
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: primaryPurple),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Register Centre',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: primaryPurple,
                       ),
-                    );
-                  },
-                  child: Column(
-                    children: [
-                      Stack(
+                    ),
+                  ],
+                ),
+              ),
+              // Scrollable Form Content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Stroke/outline effect
-                          Text(
-                            'Register Akshaya Centre',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.5,
-                              height: 1.2,
-                              foreground: Paint()
-                                ..style = PaintingStyle.stroke
-                                ..strokeWidth = 2.5
-                                ..color = color5.withOpacity(0.5),
-                            ),
-                          ),
-                          // Main text with gradient-like shadow
-                          Text(
-                            'Register Akshaya Centre',
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.w900,
-                              color: color5,
-                              letterSpacing: 1.5,
-                              height: 1.2,
-                              shadows: [
-                                Shadow(
-                                  color: color4.withOpacity(0.8),
-                                  offset: const Offset(2, 2),
-                                  blurRadius: 4,
-                                ),
-                                Shadow(
-                                  color: color3.withOpacity(0.6),
-                                  offset: const Offset(4, 4),
-                                  blurRadius: 8,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Decorative line with gradient
-                      Container(
-                        width: 100,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(2),
-                          gradient: LinearGradient(
-                            colors: [
-                              color5,
-                              color4,
-                              color3,
+                          const SizedBox(height: 20),
+                          // Header Section
+                          _buildHeaderSection(),
+                          const SizedBox(height: 30),
+                          // Centre Information Card
+                          _buildSectionCard(
+                            title: 'Centre Information',
+                            icon: Icons.business,
+                            children: [
+                              _buildModernTextField(
+                                controller: _centreNameController,
+                                label: 'Centre Name',
+                                icon: Icons.business_center,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter centre name';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildModernTextField(
+                                controller: _registrationNumberController,
+                                label: 'Registration Number',
+                                icon: Icons.confirmation_number,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter registration number';
+                                  }
+                                  return null;
+                                },
+                              ),
                             ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: color5.withOpacity(0.5),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
+                          const SizedBox(height: 20),
+                          // Location Details Card
+                          _buildSectionCard(
+                            title: 'Location Details',
+                            icon: Icons.location_on,
+                            children: [
+                              _buildModernTextField(
+                                controller: _addressController,
+                                label: 'Address',
+                                icon: Icons.home,
+                                maxLines: 2,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter address';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildModernTextField(
+                                      controller: _cityController,
+                                      label: 'City',
+                                      icon: Icons.location_city,
+                                      validator: (value) {
+                                        if (value == null || value.trim().isEmpty) {
+                                          return 'Required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildModernTextField(
+                                      controller: _stateController,
+                                      label: 'State',
+                                      icon: Icons.map,
+                                      validator: (value) {
+                                        if (value == null || value.trim().isEmpty) {
+                                          return 'Required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              _buildModernTextField(
+                                controller: _pinCodeController,
+                                label: 'PIN Code',
+                                icon: Icons.pin_drop,
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter PIN code';
+                                  }
+                                  if (value.length != 6) {
+                                    return 'PIN code must be 6 digits';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          // Contact Information Card
+                          _buildSectionCard(
+                            title: 'Contact Information',
+                            icon: Icons.contact_phone,
+                            children: [
+                              _buildModernTextField(
+                                controller: _contactPersonController,
+                                label: 'Contact Person Name',
+                                icon: Icons.person,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter contact person name';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildModernTextField(
+                                controller: _contactPhoneController,
+                                label: 'Contact Phone',
+                                icon: Icons.phone,
+                                keyboardType: TextInputType.phone,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter contact phone';
+                                  }
+                                  if (value.length != 10) {
+                                    return 'Phone number must be 10 digits';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildModernTextField(
+                                controller: _contactEmailController,
+                                label: 'Contact Email',
+                                icon: Icons.email,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Please enter contact email';
+                                  }
+                                  if (!value.contains('@')) {
+                                    return 'Please enter a valid email';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 30),
+                          // Submit Button
+                          _buildSubmitButton(),
+                          const SizedBox(height: 40),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 40),
-                // 3D Skewed Form Container
-                Transform(
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.001)
-                    ..rotateX(-0.25),
-                  alignment: Alignment.center,
-                  child: Column(
-                    children: [
-                      // Centre Name Field
-                      _build3DInputField(
-                        controller: _centreNameController,
-                        focusNode: _centreNameFocusNode,
-                        hintText: 'Centre Name',
-                        backgroundColor: color5,
-                        sideColor: color5,
-                        topColor: color5,
-                        icon: Icons.business,
-                        isHovered: _centreNameHover,
-                        isFocused: _centreNameFocused,
-                        onHoverChange: (hover) => setState(() => _centreNameHover = hover),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter centre name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 0),
-                      
-                      // Registration Number Field
-                      _build3DInputField(
-                        controller: _registrationNumberController,
-                        focusNode: _registrationNumberFocusNode,
-                        hintText: 'Registration Number',
-                        backgroundColor: color4,
-                        sideColor: color4,
-                        topColor: color4,
-                        icon: Icons.confirmation_number,
-                        isHovered: _registrationNumberHover,
-                        isFocused: _registrationNumberFocused,
-                        onHoverChange: (hover) => setState(() => _registrationNumberHover = hover),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter registration number';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 0),
-                      
-                      // Address Field
-                      _build3DInputField(
-                        controller: _addressController,
-                        focusNode: _addressFocusNode,
-                        hintText: 'Address',
-                        backgroundColor: color3,
-                        sideColor: color3,
-                        topColor: color3,
-                        icon: Icons.location_on,
-                        isHovered: _addressHover,
-                        isFocused: _addressFocused,
-                        onHoverChange: (hover) => setState(() => _addressHover = hover),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter address';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 0),
-                      
-                      // City Field
-                      _build3DInputField(
-                        controller: _cityController,
-                        focusNode: _cityFocusNode,
-                        hintText: 'City',
-                        backgroundColor: color2,
-                        sideColor: color2,
-                        topColor: color2,
-                        icon: Icons.location_city,
-                        isHovered: _cityHover,
-                        isFocused: _cityFocused,
-                        onHoverChange: (hover) => setState(() => _cityHover = hover),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter city';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 0),
-                      
-                      // State Field
-                      _build3DInputField(
-                        controller: _stateController,
-                        focusNode: _stateFocusNode,
-                        hintText: 'State',
-                        backgroundColor: color1,
-                        sideColor: color1,
-                        topColor: color1,
-                        icon: Icons.map,
-                        isHovered: _stateHover,
-                        isFocused: _stateFocused,
-                        onHoverChange: (hover) => setState(() => _stateHover = hover),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter state';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 0),
-                      
-                      // PIN Code Field
-                      _build3DInputField(
-                        controller: _pinCodeController,
-                        focusNode: _pinCodeFocusNode,
-                        hintText: 'PIN Code',
-                        backgroundColor: color1,
-                        sideColor: color1,
-                        topColor: color1,
-                        icon: Icons.pin_drop,
-                        keyboardType: TextInputType.number,
-                        isHovered: _pinCodeHover,
-                        isFocused: _pinCodeFocused,
-                        onHoverChange: (hover) => setState(() => _pinCodeHover = hover),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter PIN code';
-                          }
-                          if (value.length != 6) {
-                            return 'PIN code must be 6 digits';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 0),
-                      
-                      // Contact Person Field
-                      _build3DInputField(
-                        controller: _contactPersonController,
-                        focusNode: _contactPersonFocusNode,
-                        hintText: 'Contact Person Name',
-                        backgroundColor: color2,
-                        sideColor: color2,
-                        topColor: color2,
-                        icon: Icons.person,
-                        isHovered: _contactPersonHover,
-                        isFocused: _contactPersonFocused,
-                        onHoverChange: (hover) => setState(() => _contactPersonHover = hover),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter contact person name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 0),
-                      
-                      // Contact Phone Field
-                      _build3DInputField(
-                        controller: _contactPhoneController,
-                        focusNode: _contactPhoneFocusNode,
-                        hintText: 'Contact Phone',
-                        backgroundColor: color3,
-                        sideColor: color3,
-                        topColor: color3,
-                        icon: Icons.phone,
-                        keyboardType: TextInputType.phone,
-                        isHovered: _contactPhoneHover,
-                        isFocused: _contactPhoneFocused,
-                        onHoverChange: (hover) => setState(() => _contactPhoneHover = hover),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter contact phone';
-                          }
-                          if (value.length != 10) {
-                            return 'Phone number must be 10 digits';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 0),
-                      
-                      // Contact Email Field
-                      _build3DInputField(
-                        controller: _contactEmailController,
-                        focusNode: _contactEmailFocusNode,
-                        hintText: 'Contact Email',
-                        backgroundColor: color4,
-                        sideColor: color4,
-                        topColor: color4,
-                        icon: Icons.email,
-                        keyboardType: TextInputType.emailAddress,
-                        isHovered: _contactEmailHover,
-                        isFocused: _contactEmailFocused,
-                        onHoverChange: (hover) => setState(() => _contactEmailHover = hover),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter contact email';
-                          }
-                          if (!value.contains('@')) {
-                            return 'Please enter a valid email';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 0),
-                      
-                      // Submit Button with 3D effect
-                      _build3DButton(
-                        onPressed: _isLoading ? null : _registerCentre,
-                        text: _isLoading ? 'Registering...' : 'Register Centre',
-                        backgroundColor: color5,
-                        sideColor: color5,
-                        topColor: color5,
-                        isHovered: _buttonHover,
-                        onHoverChange: (hover) => setState(() => _buttonHover = hover),
-                        isLoading: _isLoading,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 40),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _build3DInputField({
-    required TextEditingController controller,
-    required FocusNode focusNode,
-    required String hintText,
-    required Color backgroundColor,
-    required Color sideColor,
-    required Color topColor,
+  Widget _buildHeaderSection() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: primaryPurple.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(
+            Icons.app_registration,
+            size: 50,
+            color: primaryPurple,
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Text(
+          'Register Your Akshaya Centre',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: darkPurple,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Fill in the details below to register your centre',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
     required IconData icon,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
-    required bool isHovered,
-    required bool isFocused,
-    required Function(bool) onHoverChange,
+    required List<Widget> children,
   }) {
-    // Calculate drawer animation values
-    final double drawerOffset = isFocused ? -30.0 : (isHovered ? -20.0 : 0.0);
-    final double fieldWidth = isFocused ? 280.0 : 250.0;
-    
-    return MouseRegion(
-      onEnter: (_) => onHoverChange(true),
-      onExit: (_) => onHoverChange(false),
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: isFocused ? 400 : 300),
-        curve: isFocused ? Curves.easeOutCubic : Curves.easeInOut,
-        transform: Matrix4.identity()
-          ..translate(drawerOffset, 0.0, 0.0),
-        child: Stack(
+    return Card(
+      elevation: 2,
+      shadowColor: primaryPurple.withOpacity(0.1),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Left side panel (3D effect)
-            Positioned(
-              left: 0,
-              top: 0,
-              child: Transform(
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, 0.001)
-                  ..rotateY(0.785),
-                alignment: Alignment.centerRight,
-                child: Container(
-                  width: 40,
-                  height: 50,
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: sideColor.withOpacity(0.8),
-                    border: Border.all(color: sideColor, width: 0.5),
+                    color: primaryPurple.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: primaryPurple,
+                    size: 20,
                   ),
                 ),
-              ),
-            ),
-            
-            // Top panel (3D effect)
-            Positioned(
-              left: 40,
-              top: -40,
-              child: Transform(
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, 0.001)
-                  ..rotateX(0.785),
-                alignment: Alignment.bottomCenter,
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: isFocused ? 400 : 300),
-                  curve: isFocused ? Curves.easeOutCubic : Curves.easeInOut,
-                  width: fieldWidth,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: topColor.withOpacity(0.8),
-                    border: Border.all(color: topColor, width: 0.5),
+                const SizedBox(width: 12),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: darkPurple,
                   ),
                 ),
-              ),
+              ],
             ),
-            
-            // Main input field
-            AnimatedContainer(
-              duration: Duration(milliseconds: isFocused ? 400 : 300),
-              curve: isFocused ? Curves.easeOutCubic : Curves.easeInOut,
-              margin: const EdgeInsets.only(left: 40),
-              width: fieldWidth,
-              height: 50,
-              decoration: BoxDecoration(
-                color: backgroundColor,
-                border: Border.all(color: sideColor, width: 0.5),
-                boxShadow: isFocused ? [
-                  BoxShadow(
-                    color: sideColor.withOpacity(0.6),
-                    blurRadius: 15,
-                    spreadRadius: 3,
-                  ),
-                ] : [],
-              ),
-              child: TextFormField(
-                controller: controller,
-                focusNode: focusNode,
-                keyboardType: keyboardType,
-                style: const TextStyle(color: Colors.black),
-                decoration: InputDecoration(
-                  hintText: hintText,
-                  hintStyle: const TextStyle(color: Colors.black54),
-                  prefixIcon: Icon(icon, color: Colors.black54),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                ),
-                validator: validator,
-              ),
-            ),
+            const SizedBox(height: 20),
+            ...children,
           ],
         ),
       ),
     );
   }
 
-  Widget _build3DButton({
-    required VoidCallback? onPressed,
-    required String text,
-    required Color backgroundColor,
-    required Color sideColor,
-    required Color topColor,
-    required bool isHovered,
-    required Function(bool) onHoverChange,
-    required bool isLoading,
+  Widget _buildModernTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    String? Function(String?)? validator,
   }) {
-    return MouseRegion(
-      onEnter: (_) => onHoverChange(true),
-      onExit: (_) => onHoverChange(false),
-      child: GestureDetector(
-        onTap: onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          transform: Matrix4.identity()
-            ..translate(isHovered ? -20.0 : 0.0, 0.0, 0.0),
-          child: Stack(
-            children: [
-              // Left side panel (3D effect)
-              Positioned(
-                left: 0,
-                top: 0,
-                child: Transform(
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.001)
-                    ..rotateY(0.785),
-                  alignment: Alignment.centerRight,
-                  child: Container(
-                    width: 40,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: isHovered ? buttonColor.withOpacity(0.8) : sideColor.withOpacity(0.8),
-                      border: Border.all(
-                        color: isHovered ? buttonColor : sideColor,
-                        width: 0.5,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              
-              // Top panel (3D effect)
-              Positioned(
-                left: 40,
-                top: -40,
-                child: Transform(
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, 0.001)
-                    ..rotateX(0.785),
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    width: 250,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: isHovered ? buttonColor.withOpacity(0.8) : topColor.withOpacity(0.8),
-                      border: Border.all(
-                        color: isHovered ? buttonColor : topColor,
-                        width: 0.5,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              
-              // Main button
-              Container(
-                margin: const EdgeInsets.only(left: 40),
-                width: 250,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: isHovered ? buttonColor : backgroundColor,
-                  border: Border.all(
-                    color: isHovered ? buttonColor : sideColor,
-                    width: 0.5,
-                  ),
-                ),
-                child: Center(
-                  child: isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : Text(
-                          text,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      style: const TextStyle(fontSize: 16),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.grey[600]),
+        prefixIcon: Icon(icon, color: primaryPurple),
+        filled: true,
+        fillColor: Colors.grey[50],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey[200]!, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: primaryPurple, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+      validator: validator,
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _isLoading ? null : _registerCentre,
+        borderRadius: BorderRadius.circular(12),
+        child: Ink(
+          height: 56,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [primaryPurple, darkPurple],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: primaryPurple.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
             ],
+          ),
+          child: Center(
+            child: _isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Text(
+                    'Register Centre',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
           ),
         ),
       ),
