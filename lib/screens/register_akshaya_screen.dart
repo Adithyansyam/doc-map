@@ -10,10 +10,10 @@ class RegisterAkshayaScreen extends StatefulWidget {
 
 class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with SingleTickerProviderStateMixin {
   // Modern Color Scheme
-  static const Color primaryPurple = Color(0xFF9C27B0);
-  static const Color lightPurple = Color(0xFFE1BEE7);
-  static const Color darkPurple = Color(0xFF7B1FA2);
-  static const Color accentColor = Color(0xFFBA68C8);
+  static const Color primaryPurple = Color(0xFFCDABFF);
+  static const Color lightPurple = Color(0xFFE8D9FF);
+  static const Color darkPurple = Color(0xFFB896E8);
+  static const Color accentColor = Color(0xFFCDABFF);
   
   final _formKey = GlobalKey<FormState>();
   final _centreNameController = TextEditingController();
@@ -113,17 +113,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              primaryPurple.withOpacity(0.1),
-              lightPurple.withOpacity(0.2),
-              Colors.white,
-            ],
-          ),
-        ),
+        color: Colors.white,
         child: SafeArea(
           child: Column(
             children: [
