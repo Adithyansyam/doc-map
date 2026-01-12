@@ -27,7 +27,7 @@ class CentreService {
       }
 
       // Save centre data to Firestore
-      await _firestore.collection('center').add({
+      await _firestore.collection('centers').add({
         'centreName': centreName,
         'registrationNumber': registrationNumber,
         'address': address,
@@ -58,7 +58,7 @@ class CentreService {
       }
 
       final querySnapshot = await _firestore
-          .collection('center')
+          .collection('centers')
           .where('userId', isEqualTo: user.uid)
           .orderBy('createdAt', descending: true)
           .get();
@@ -79,7 +79,7 @@ class CentreService {
   // Get a specific centre by ID
   Future<Map<String, dynamic>?> getCentreById(String centreId) async {
     try {
-      final doc = await _firestore.collection('center').doc(centreId).get();
+      final doc = await _firestore.collection('centers').doc(centreId).get();
       
       if (doc.exists) {
         return {
@@ -109,7 +109,7 @@ class CentreService {
     required String contactEmail,
   }) async {
     try {
-      await _firestore.collection('center').doc(centreId).update({
+      await _firestore.collection('centers').doc(centreId).update({
         'centreName': centreName,
         'registrationNumber': registrationNumber,
         'address': address,
@@ -131,7 +131,7 @@ class CentreService {
   // Delete a centre
   Future<void> deleteCentre(String centreId) async {
     try {
-      await _firestore.collection('center').doc(centreId).delete();
+      await _firestore.collection('centers').doc(centreId).delete();
     } on FirebaseException catch (e) {
       throw Exception('Failed to delete centre: ${e.message}');
     } catch (e) {
@@ -147,7 +147,7 @@ class CentreService {
     }
 
     return _firestore
-        .collection('center')
+        .collection('centers')
         .where('userId', isEqualTo: user.uid)
         .orderBy('createdAt', descending: true)
         .snapshots()
@@ -168,7 +168,7 @@ class CentreService {
       }
 
       final querySnapshot = await _firestore
-          .collection('center')
+          .collection('centers')
           .where('userId', isEqualTo: user.uid)
           .where('status', isEqualTo: status)
           .orderBy('createdAt', descending: true)
