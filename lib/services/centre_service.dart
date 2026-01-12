@@ -149,7 +149,8 @@ class CentreService {
     return _firestore
         .collection('centers')
         .where('userId', isEqualTo: user.uid)
-        .orderBy('createdAt', descending: true)
+        // Removed orderBy temporarily - add back after creating Firebase index
+        // .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => {

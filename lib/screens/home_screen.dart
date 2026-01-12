@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'login_screen.dart';
 import 'profile_screen.dart';
 import 'register_akshaya_screen.dart';
+import 'my_centers_screen.dart';
 import '../widgets/homepage_navbar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -481,14 +482,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildRegisterContent() {
-    // Navigate to Register Akshaya Screen
+    // Navigate to My Centers Screen
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_currentIndex == 1) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const RegisterAkshayaScreen()),
+          MaterialPageRoute(builder: (context) => const MyCentersScreen()),
         ).then((_) {
-          // Reset to home tab when returning from register
+          // Reset to home tab when returning from my centers
           setState(() {
             _currentIndex = 0;
           });
