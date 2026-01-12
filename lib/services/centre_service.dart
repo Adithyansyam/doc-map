@@ -19,6 +19,8 @@ class CentreService {
     required String contactPerson,
     required String contactPhone,
     required String contactEmail,
+    required double latitude,
+    required double longitude,
   }) async {
     try {
       final user = currentUser;
@@ -37,6 +39,8 @@ class CentreService {
         'contactPerson': contactPerson,
         'contactPhone': contactPhone,
         'contactEmail': contactEmail,
+        'latitude': latitude,
+        'longitude': longitude,
         'userId': user.uid,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
@@ -186,5 +190,19 @@ class CentreService {
     } catch (e) {
       throw Exception('Failed to get centres by status: $e');
     }
+  }
+
+  // Get all centres stream (for map display)
+  Stream<List<Map<String, dynamic>>> getAllCentersStream() {
+    return _firestore
+        .collection('centers')
+        .where('status', isEqualTo: 'approved') // Only show approved centers on map
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => {
+                  'id': doc.id,
+                  ...doc.data(),
+                })
+            .toList());
   }
 }

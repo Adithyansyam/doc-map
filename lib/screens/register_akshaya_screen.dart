@@ -25,6 +25,8 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
   final _contactPersonController = TextEditingController();
   final _contactPhoneController = TextEditingController();
   final _contactEmailController = TextEditingController();
+  final _latitudeController = TextEditingController();
+  final _longitudeController = TextEditingController();
   
   final _centreService = CentreService();
   bool _isLoading = false;
@@ -56,6 +58,8 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
     _contactPersonController.dispose();
     _contactPhoneController.dispose();
     _contactEmailController.dispose();
+    _latitudeController.dispose();
+    _longitudeController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -78,6 +82,8 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
         contactPerson: _contactPersonController.text.trim(),
         contactPhone: _contactPhoneController.text.trim(),
         contactEmail: _contactEmailController.text.trim(),
+        latitude: double.parse(_latitudeController.text.trim()),
+        longitude: double.parse(_longitudeController.text.trim()),
       );
 
       if (mounted) {
@@ -248,6 +254,49 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                                   }
                                   return null;
                                 },
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          // Coordinates Section
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildModernTextField(
+                                  controller: _latitudeController,
+                                  label: 'Latitude',
+                                  icon: Icons.my_location,
+                                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Required';
+                                    }
+                                    final lat = double.tryParse(value);
+                                    if (lat == null || lat < -90 || lat > 90) {
+                                      return 'Invalid latitude';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildModernTextField(
+                                  controller: _longitudeController,
+                                  label: 'Longitude',
+                                  icon: Icons.location_on,
+                                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return 'Required';
+                                    }
+                                    final lng = double.tryParse(value);
+                                    if (lng == null || lng < -180 || lng > 180) {
+                                      return 'Invalid longitude';
+                                    }
+                                    return null;
+                                  },
+                                ),
                               ),
                             ],
                           ),

@@ -9,6 +9,7 @@ import 'profile_screen.dart';
 import 'register_akshaya_screen.dart';
 import 'my_centers_screen.dart';
 import '../widgets/homepage_navbar.dart';
+import '../services/centre_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
   final user = FirebaseAuth.instance.currentUser;
+  final _centreService = CentreService();
   
   // Location tracking variables
   LatLng? _currentLocation;
@@ -432,6 +434,77 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
                 ],
               ),
+            // Center markers
+            StreamBuilder<List<Map<String, dynamic>>>(
+              stream: _centreService.getAllCentersStream(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return SizedBox.shrink();
+                }
+
+                final centers = snapshot.data!;
+                final markers = centers
+                    .where((center) => 
+                        center['latitude'] != null && 
+                        center['longitude'] != null)
+                    .map((center) {
+                  return Marker(
+                    point: LatLng(
+                      center['latitude'] as double,
+                      center['longitude'] as double,
+                    ),
+                    width: 60,
+                    height: 60,
+                    child: GestureDetector(
+                      onTap: () => _showCenterInfo(center),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFCDABFF),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 4,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.business,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              center['centreName'] ?? '',
+                              style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFCDABFF),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList();
+
+                return MarkerLayer(markers: markers);
+              },
+            ),
             RichAttributionWidget(
               attributions: [
                 TextSourceAttribution(
@@ -477,6 +550,129 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               child: Icon(Icons.my_location, color: Colors.white),
             ),
           ),
+      ],
+    );
+  }
+
+  void _showCenterInfo(Map<String, dynamic> center) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFCDABFF).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.business,
+                    color: Color(0xFFCDABFF),
+                    size: 30,
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        center['centreName'] ?? 'Unknown Center',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFB896E8),
+                        ),
+                      ),
+                      Text(
+                        center['registrationNumber'] ?? '',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            _buildInfoRow(Icons.location_on, 'Address', 
+                '${center['address']}, ${center['city']}, ${center['state']} - ${center['pinCode']}'),
+            SizedBox(height: 12),
+            _buildInfoRow(Icons.person, 'Contact Person', center['contactPerson'] ?? 'N/A'),
+            SizedBox(height: 12),
+            _buildInfoRow(Icons.phone, 'Phone', center['contactPhone'] ?? 'N/A'),
+            SizedBox(height: 12),
+            _buildInfoRow(Icons.email, 'Email', center['contactEmail'] ?? 'N/A'),
+            SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFCDABFF),
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'Close',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: Color(0xFFCDABFF)),
+        SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
