@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:akshaya_hub/services/centre_service.dart';
 
 class RegisterAkshayaScreen extends StatefulWidget {
   const RegisterAkshayaScreen({super.key});
@@ -27,6 +26,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
   final _contactPhoneController = TextEditingController();
   final _contactEmailController = TextEditingController();
   
+  final _centreService = CentreService();
   bool _isLoading = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -68,27 +68,17 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
     });
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Save centre data to Firestore
-      await FirebaseFirestore.instance.collection('centres').add({
-        'centreName': _centreNameController.text.trim(),
-        'registrationNumber': _registrationNumberController.text.trim(),
-        'address': _addressController.text.trim(),
-        'city': _cityController.text.trim(),
-        'state': _stateController.text.trim(),
-        'pinCode': _pinCodeController.text.trim(),
-        'contactPerson': _contactPersonController.text.trim(),
-        'contactPhone': _contactPhoneController.text.trim(),
-        'contactEmail': _contactEmailController.text.trim(),
-        'userId': user.uid,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-        'status': 'pending', // pending, approved, rejected
-      });
+      await _centreService.registerCentre(
+        centreName: _centreNameController.text.trim(),
+        registrationNumber: _registrationNumberController.text.trim(),
+        address: _addressController.text.trim(),
+        city: _cityController.text.trim(),
+        state: _stateController.text.trim(),
+        pinCode: _pinCodeController.text.trim(),
+        contactPerson: _contactPersonController.text.trim(),
+        contactPhone: _contactPhoneController.text.trim(),
+        contactEmail: _contactEmailController.text.trim(),
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,7 +94,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to register centre: $e'),
+            content: Text(e.toString()),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
