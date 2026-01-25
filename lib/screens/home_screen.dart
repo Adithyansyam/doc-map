@@ -434,7 +434,90 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
                 ],
               ),
-            // Center markers
+            // User's registered center marker (shown regardless of approval status)
+            StreamBuilder<List<Map<String, dynamic>>>(
+              stream: _centreService.getUserCentresStream(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return SizedBox.shrink();
+                }
+
+                final userCenter = snapshot.data!.first;
+                if (userCenter['latitude'] == null || userCenter['longitude'] == null) {
+                  return SizedBox.shrink();
+                }
+
+                return MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: LatLng(
+                        userCenter['latitude'] as double,
+                        userCenter['longitude'] as double,
+                      ),
+                      width: 80,
+                      height: 80,
+                      child: GestureDetector(
+                        onTap: () => _showCenterInfo(userCenter),
+                        child: Column(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Color(0xFFCDABFF), Color(0xFFB896E8)],
+                                ),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color(0xFFCDABFF).withOpacity(0.5),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.star,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFCDABFF),
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 4,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                'My Center',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            // Other approved centers markers
             StreamBuilder<List<Map<String, dynamic>>>(
               stream: _centreService.getAllCentersStream(),
               builder: (context, snapshot) {
@@ -443,7 +526,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 }
 
                 final centers = snapshot.data!;
-                final markers = centers
+                // Filter out user's own center to avoid duplicate markers
+                final otherCenters = centers.where((center) {
+                  return center['userId'] != user?.uid;
+                }).toList();
+
+                final markers = otherCenters
                     .where((center) => 
                         center['latitude'] != null && 
                         center['longitude'] != null)
@@ -555,6 +643,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _showCenterInfo(Map<String, dynamic> center) {
+    final status = center['status'] ?? 'pending';
+    final statusColor = _getStatusColor(status);
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -595,12 +686,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           color: Color(0xFFB896E8),
                         ),
                       ),
-                      Text(
-                        center['registrationNumber'] ?? '',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            center['registrationNumber'] ?? '',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: statusColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: statusColor.withOpacity(0.5),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              status.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: statusColor,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -642,6 +757,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      case 'pending':
+      default:
+        return Colors.orange;
+    }
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {

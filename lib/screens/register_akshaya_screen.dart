@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:akshaya_hub/services/centre_service.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class RegisterAkshayaScreen extends StatefulWidget {
   const RegisterAkshayaScreen({super.key});
@@ -111,6 +113,216 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
         setState(() {
           _isLoading = false;
         });
+      }
+    }
+  }
+
+  Future<void> _pickLocationOnMap() async {
+    LatLng? selectedLocation;
+    
+    // Default to India center or use existing coordinates if available
+    LatLng initialCenter = const LatLng(20.5937, 78.9629);
+    if (_latitudeController.text.isNotEmpty && _longitudeController.text.isNotEmpty) {
+      try {
+        initialCenter = LatLng(
+          double.parse(_latitudeController.text),
+          double.parse(_longitudeController.text),
+        );
+      } catch (e) {
+        // Use default if parsing fails
+      }
+    }
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        LatLng? tempLocation = initialCenter;
+        
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.8,
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Header
+                    Row(
+                      children: [
+                        Icon(Icons.map, color: primaryPurple, size: 28),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text(
+                            'Pick Location',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: darkPurple,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: lightPurple.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.touch_app, size: 20, color: primaryPurple),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Tap on the map to select your center location',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Selected coordinates display
+                    if (tempLocation != null)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: primaryPurple.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: primaryPurple.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.location_on, color: primaryPurple, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Lat: ${tempLocation!.latitude.toStringAsFixed(6)}, Lng: ${tempLocation!.longitude.toStringAsFixed(6)}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    
+                    // Map
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: FlutterMap(
+                          options: MapOptions(
+                            initialCenter: initialCenter,
+                            initialZoom: 13.0,
+                            onTap: (tapPosition, point) {
+                              setState(() {
+                                tempLocation = point;
+                              });
+                            },
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              userAgentPackageName: 'com.akshaya.hub',
+                            ),
+                            if (tempLocation != null)
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                    point: tempLocation!,
+                                    width: 50,
+                                    height: 50,
+                                    child: const Icon(
+                                      Icons.location_pin,
+                                      color: Color(0xFFCDABFF),
+                                      size: 50,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    // Confirm Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: tempLocation == null
+                            ? null
+                            : () {
+                                selectedLocation = tempLocation;
+                                Navigator.of(context).pop();
+                              },
+                        icon: const Icon(Icons.check, color: Colors.white),
+                        label: const Text(
+                          'Confirm Location',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryPurple,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          disabledBackgroundColor: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    // Update the text fields if a location was selected
+    if (selectedLocation != null) {
+      setState(() {
+        _latitudeController.text = selectedLocation!.latitude.toStringAsFixed(6);
+        _longitudeController.text = selectedLocation!.longitude.toStringAsFixed(6);
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 10),
+                Text('Location selected successfully!'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -258,44 +470,97 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                             ],
                           ),
                           const SizedBox(height: 16),
-                          // Coordinates Section
-                          Row(
+                          // Coordinates Section with Map Picker
+                          _buildSectionCard(
+                            title: 'Location Coordinates',
+                            icon: Icons.map,
                             children: [
-                              Expanded(
-                                child: _buildModernTextField(
-                                  controller: _latitudeController,
-                                  label: 'Latitude',
-                                  icon: Icons.my_location,
-                                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                  validator: (value) {
-                                    if (value == null || value.trim().isEmpty) {
-                                      return 'Required';
-                                    }
-                                    final lat = double.tryParse(value);
-                                    if (lat == null || lat < -90 || lat > 90) {
-                                      return 'Invalid latitude';
-                                    }
-                                    return null;
-                                  },
+                              // Pick Location Button
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: _pickLocationOnMap,
+                                  icon: const Icon(Icons.map, color: Colors.white),
+                                  label: const Text(
+                                    'Pick Location on Map',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: primaryPurple,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildModernTextField(
-                                  controller: _longitudeController,
-                                  label: 'Longitude',
-                                  icon: Icons.location_on,
-                                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                  validator: (value) {
-                                    if (value == null || value.trim().isEmpty) {
-                                      return 'Required';
-                                    }
-                                    final lng = double.tryParse(value);
-                                    if (lng == null || lng < -180 || lng > 180) {
-                                      return 'Invalid longitude';
-                                    }
-                                    return null;
-                                  },
+                              const SizedBox(height: 16),
+                              // Coordinates Display
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildModernTextField(
+                                      controller: _latitudeController,
+                                      label: 'Latitude',
+                                      icon: Icons.my_location,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      validator: (value) {
+                                        if (value == null || value.trim().isEmpty) {
+                                          return 'Required';
+                                        }
+                                        final lat = double.tryParse(value);
+                                        if (lat == null || lat < -90 || lat > 90) {
+                                          return 'Invalid latitude';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildModernTextField(
+                                      controller: _longitudeController,
+                                      label: 'Longitude',
+                                      icon: Icons.location_on,
+                                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                      validator: (value) {
+                                        if (value == null || value.trim().isEmpty) {
+                                          return 'Required';
+                                        }
+                                        final lng = double.tryParse(value);
+                                        if (lng == null || lng < -180 || lng > 180) {
+                                          return 'Invalid longitude';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: lightPurple.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.info_outline, size: 16, color: primaryPurple),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Tap the button above to select your center location on the map',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
