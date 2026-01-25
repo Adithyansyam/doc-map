@@ -8,6 +8,45 @@ class CentreService {
   // Get current user
   User? get currentUser => _auth.currentUser;
 
+  // Check if user has already registered a centre
+  Future<bool> hasUserRegisteredCentre() async {
+    try {
+      final user = currentUser;
+      if (user == null) {
+        return false;
+      }
+
+      final querySnapshot = await _firestore
+          .collection('centers')
+          .where('userId', isEqualTo: user.uid)
+          .limit(1)
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Get count of user's centres
+  Future<int> getUserCentreCount() async {
+    try {
+      final user = currentUser;
+      if (user == null) {
+        return 0;
+      }
+
+      final querySnapshot = await _firestore
+          .collection('centers')
+          .where('userId', isEqualTo: user.uid)
+          .get();
+
+      return querySnapshot.docs.length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
   // Register a new centre
   Future<void> registerCentre({
     required String centreName,
@@ -26,6 +65,12 @@ class CentreService {
       final user = currentUser;
       if (user == null) {
         throw Exception('User not authenticated');
+      }
+
+      // Check if user has already registered a centre
+      final hasRegistered = await hasUserRegisteredCentre();
+      if (hasRegistered) {
+        throw Exception('You can only register one centre per account');
       }
 
       // Save centre data to Firestore
