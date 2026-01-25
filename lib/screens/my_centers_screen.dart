@@ -178,66 +178,13 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
     );
   }
 
-  Widget _buildCenterDetailsView(Map<String, dynamic> center) {
-    final status = center['status'] ?? 'pending';
-    final statusColor = _getStatusColor(status);
-    final statusIcon = _getStatusIcon(status);
 
+  Widget _buildCenterDetailsView(Map<String, dynamic> center) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Status Banner
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  statusColor.withOpacity(0.1),
-                  statusColor.withOpacity(0.05),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: statusColor.withOpacity(0.3),
-                width: 2,
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(statusIcon, color: statusColor, size: 28),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Registration Status',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        status.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: statusColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 24),
           
           // Center Information Card
           _buildFullDetailSection(

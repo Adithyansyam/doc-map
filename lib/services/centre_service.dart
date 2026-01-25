@@ -89,7 +89,7 @@ class CentreService {
         'userId': user.uid,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
-        'status': 'pending', // pending, approved, rejected
+        'status': 'approved', // approved, rejected
       });
     } on FirebaseException catch (e) {
       throw Exception('Failed to register centre: ${e.message}');
