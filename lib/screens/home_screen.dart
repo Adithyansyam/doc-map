@@ -642,7 +642,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
         // Pull-up drawer
-        const CenterDrawer(),
+        CenterDrawer(userLocation: _currentLocation),
       ],
     );
   }
