@@ -1,0 +1,182 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+class AppointmentService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // Get current user ID
+  String? get currentUserId => _auth.currentUser?.uid;
+
+  // Collection reference
+  CollectionReference get _appointmentsCollection =>
+      _firestore.collection('appointments');
+
+  // Book a new appointment
+  Future<String> bookAppointment({
+    required String centerId,
+    required String centerName,
+    required String centerAddress,
+    required String centerPhone,
+    required DateTime appointmentDate,
+    required String appointmentTime,
+    required String purpose,
+    String? notes,
+  }) async {
+    if (currentUserId == null) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      // Get user details
+      final userDoc = await _firestore.collection('users').doc(currentUserId).get();
+      final userData = userDoc.data() as Map<String, dynamic>?;
+
+      final appointmentData = {
+        'userId': currentUserId,
+        'userName': userData?['name'] ?? 'Unknown User',
+        'userEmail': userData?['email'] ?? _auth.currentUser?.email,
+        'userPhone': userData?['phone'] ?? '',
+        'centerId': centerId,
+        'centerName': centerName,
+        'centerAddress': centerAddress,
+        'centerPhone': centerPhone,
+        'appointmentDate': Timestamp.fromDate(appointmentDate),
+        'appointmentTime': appointmentTime,
+        'purpose': purpose,
+        'notes': notes ?? '',
+        'status': 'pending', // pending, confirmed, completed, cancelled
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      final docRef = await _appointmentsCollection.add(appointmentData);
+      return docRef.id;
+    } catch (e) {
+      throw Exception('Failed to book appointment: $e');
+    }
+  }
+
+  // Get user's appointments stream
+  Stream<List<Map<String, dynamic>>> getUserAppointmentsStream() {
+    if (currentUserId == null) {
+      return Stream.value([]);
+    }
+
+    return _appointmentsCollection
+        .where('userId', isEqualTo: currentUserId)
+        .orderBy('appointmentDate', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              data['id'] = doc.id;
+              return data;
+            }).toList());
+  }
+
+  // Get upcoming appointments
+  Stream<List<Map<String, dynamic>>> getUpcomingAppointmentsStream() {
+    if (currentUserId == null) {
+      return Stream.value([]);
+    }
+
+    return _appointmentsCollection
+        .where('userId', isEqualTo: currentUserId)
+        .where('appointmentDate', isGreaterThanOrEqualTo: Timestamp.now())
+        .where('status', whereIn: ['pending', 'confirmed'])
+        .orderBy('appointmentDate')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              data['id'] = doc.id;
+              return data;
+            }).toList());
+  }
+
+  // Get past appointments
+  Stream<List<Map<String, dynamic>>> getPastAppointmentsStream() {
+    if (currentUserId == null) {
+      return Stream.value([]);
+    }
+
+    return _appointmentsCollection
+        .where('userId', isEqualTo: currentUserId)
+        .where('appointmentDate', isLessThan: Timestamp.now())
+        .orderBy('appointmentDate', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              data['id'] = doc.id;
+              return data;
+            }).toList());
+  }
+
+  // Cancel appointment
+  Future<void> cancelAppointment(String appointmentId) async {
+    try {
+      await _appointmentsCollection.doc(appointmentId).update({
+        'status': 'cancelled',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to cancel appointment: $e');
+    }
+  }
+
+  // Reschedule appointment
+  Future<void> rescheduleAppointment({
+    required String appointmentId,
+    required DateTime newDate,
+    required String newTime,
+  }) async {
+    try {
+      await _appointmentsCollection.doc(appointmentId).update({
+        'appointmentDate': Timestamp.fromDate(newDate),
+        'appointmentTime': newTime,
+        'status': 'pending',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to reschedule appointment: $e');
+    }
+  }
+
+  // Get appointment by ID
+  Future<Map<String, dynamic>?> getAppointmentById(String appointmentId) async {
+    try {
+      final doc = await _appointmentsCollection.doc(appointmentId).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        return data;
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to get appointment: $e');
+    }
+  }
+
+  // Check if time slot is available
+  Future<bool> isTimeSlotAvailable({
+    required String centerId,
+    required DateTime date,
+    required String time,
+  }) async {
+    try {
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final existingAppointments = await _appointmentsCollection
+          .where('centerId', isEqualTo: centerId)
+          .where('appointmentDate', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('appointmentDate', isLessThan: Timestamp.fromDate(endOfDay))
+          .where('appointmentTime', isEqualTo: time)
+          .where('status', whereIn: ['pending', 'confirmed'])
+          .get();
+
+      return existingAppointments.docs.isEmpty;
+    } catch (e) {
+      return true; // Allow booking if check fails
+    }
+  }
+}
