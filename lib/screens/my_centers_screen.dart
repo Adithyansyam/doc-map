@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:akshaya_hub/services/centre_service.dart';
 import 'package:akshaya_hub/screens/register_akshaya_screen.dart';
 import 'package:akshaya_hub/services/notification_service.dart';
@@ -533,7 +534,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () => _approveAppointment(appointmentId, notification['id']),
+                            onPressed: () => _approveAppointment(appointmentId, notification['id'], notification),
                             icon: const Icon(Icons.check, size: 18),
                             label: const Text('Approve'),
                             style: ElevatedButton.styleFrom(
@@ -549,7 +550,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () => _rejectAppointment(appointmentId, notification['id']),
+                            onPressed: () => _rejectAppointment(appointmentId, notification['id'], notification),
                             icon: const Icon(Icons.close, size: 18),
                             label: const Text('Reject'),
                             style: ElevatedButton.styleFrom(
@@ -602,10 +603,34 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
     );
   }
 
-  Future<void> _approveAppointment(String appointmentId, String notificationId) async {
+  Future<void> _approveAppointment(String appointmentId, String notificationId, Map<String, dynamic> notification) async {
     try {
+      // Get appointment details to find the user
+      final appointment = await _appointmentService.getAppointmentById(appointmentId);
+      
       await _appointmentService.approveAppointment(appointmentId);
       await _notificationService.updateNotificationStatus(notificationId, 'confirmed');
+      
+      // Create notification for the user
+      if (appointment != null && appointment['userId'] != null) {
+        DateTime appointmentDate;
+        if (notification['appointmentDate'] is Timestamp) {
+          appointmentDate = (notification['appointmentDate'] as Timestamp).toDate();
+        } else {
+          appointmentDate = DateTime.now();
+        }
+        
+        await _notificationService.createUserNotification(
+          userId: appointment['userId'],
+          centerId: notification['centerId'] ?? '',
+          centerName: notification['centerName'] ?? 'Center',
+          appointmentId: appointmentId,
+          appointmentDate: appointmentDate,
+          appointmentTime: notification['appointmentTime'] ?? '',
+          status: 'confirmed',
+        );
+      }
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -626,7 +651,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
     }
   }
 
-  Future<void> _rejectAppointment(String appointmentId, String notificationId) async {
+  Future<void> _rejectAppointment(String appointmentId, String notificationId, Map<String, dynamic> notification) async {
     final reasonController = TextEditingController();
     final result = await showDialog<bool>(
       context: context,
@@ -665,11 +690,36 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
 
     if (result == true) {
       try {
+        // Get appointment details to find the user
+        final appointment = await _appointmentService.getAppointmentById(appointmentId);
+        
         await _appointmentService.rejectAppointment(
           appointmentId,
           reason: reasonController.text.isNotEmpty ? reasonController.text : null,
         );
         await _notificationService.updateNotificationStatus(notificationId, 'rejected');
+        
+        // Create notification for the user
+        if (appointment != null && appointment['userId'] != null) {
+          DateTime appointmentDate;
+          if (notification['appointmentDate'] is Timestamp) {
+            appointmentDate = (notification['appointmentDate'] as Timestamp).toDate();
+          } else {
+            appointmentDate = DateTime.now();
+          }
+          
+          await _notificationService.createUserNotification(
+            userId: appointment['userId'],
+            centerId: notification['centerId'] ?? '',
+            centerName: notification['centerName'] ?? 'Center',
+            appointmentId: appointmentId,
+            appointmentDate: appointmentDate,
+            appointmentTime: notification['appointmentTime'] ?? '',
+            status: 'rejected',
+            rejectionReason: reasonController.text.isNotEmpty ? reasonController.text : null,
+          );
+        }
+        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(

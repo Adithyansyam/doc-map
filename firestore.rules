@@ -58,17 +58,19 @@ service cloud.firestore {
                        resource.data.userId == request.auth.uid;
     }
     
-    // Notifications collection - center owners can read and manage their notifications
+    // Notifications collection - center owners and users can read and manage their notifications
     match /notifications/{notificationId} {
-      // Allow list queries for authenticated users (filtered by centerOwnerId in app)
+      // Allow list queries for authenticated users (filtered by centerOwnerId or userId in app)
       allow read: if request.auth != null;
       
-      // Anyone authenticated can create notifications (for appointment bookings)
+      // Anyone authenticated can create notifications (for appointment bookings and status updates)
       allow create: if request.auth != null;
       
-      // Center owners can update/delete their own notifications
+      // Center owners can update/delete their notifications (centerOwnerId)
+      // Users can update/delete their notifications (userId)
       allow update, delete: if request.auth != null && 
-                               resource.data.centerOwnerId == request.auth.uid;
+                               (resource.data.centerOwnerId == request.auth.uid || 
+                                resource.data.userId == request.auth.uid);
     }
     
     // Default deny all other collections
