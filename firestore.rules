@@ -3,13 +3,25 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && 
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
     // Users collection - users can read/write their own data
     match /users/{userId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Centers collection - anyone authenticated can read, only center owners can write
+    // Admins collection - only readable by admins themselves
+    match /admins/{adminId} {
+      allow read: if request.auth != null && request.auth.uid == adminId;
+      allow write: if false; // Admins are created manually in Firebase Console
+    }
+    
+    // Centers collection - anyone authenticated can read, owners and admins can write
     match /centers/{centerId} {
       // Allow read for all authenticated users (for listing and queries)
       allow read: if request.auth != null;
@@ -17,17 +29,19 @@ service cloud.firestore {
       // Allow create for authenticated users
       allow create: if request.auth != null;
       
-      // Allow update/delete only by the owner
-      allow update, delete: if request.auth != null && 
-                             resource.data.userId == request.auth.uid;
+      // Allow update by the owner OR by an admin (for approval/rejection)
+      allow update: if request.auth != null && 
+                       (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Allow delete only by the owner or admin
+      allow delete: if request.auth != null && 
+                       (resource.data.userId == request.auth.uid || isAdmin());
     }
     
     // Appointments collection - users can create and manage their own appointments
     match /appointments/{appointmentId} {
-      // Anyone authenticated can read their own appointments
-      allow read: if request.auth != null && 
-                     (resource.data.userId == request.auth.uid || 
-                      resource.data.centerId == request.auth.uid);
+      // Allow read for appointment owner OR center owner (to see appointments at their center)
+      allow read: if request.auth != null;
       
       // Users can create appointments
       allow create: if request.auth != null && 
@@ -36,10 +50,10 @@ service cloud.firestore {
                          'centerName', 'appointmentDate', 'appointmentTime', 
                          'purpose', 'status']);
       
-      // Users can update/delete their own appointments
-      allow update: if request.auth != null && 
-                       resource.data.userId == request.auth.uid;
+      // Users can update their own appointments OR center owners can update (approve/reject)
+      allow update: if request.auth != null;
       
+      // Users can delete their own appointments
       allow delete: if request.auth != null && 
                        resource.data.userId == request.auth.uid;
     }
@@ -47,8 +61,6 @@ service cloud.firestore {
     // Notifications collection - center owners can read and manage their notifications
     match /notifications/{notificationId} {
       // Allow list queries for authenticated users (filtered by centerOwnerId in app)
-      // Note: Firestore rules can't filter list queries, so we allow read for authenticated users
-      // The app filters by centerOwnerId in the query
       allow read: if request.auth != null;
       
       // Anyone authenticated can create notifications (for appointment bookings)

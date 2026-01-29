@@ -188,6 +188,44 @@ class CentreService {
     }
   }
 
+  // Update centre status (approve/reject)
+  Future<void> updateCentreStatus({
+    required String centreId,
+    required String status,
+    String? rejectionReason,
+  }) async {
+    try {
+      final updateData = {
+        'status': status,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+      
+      if (status == 'rejected' && rejectionReason != null) {
+        updateData['rejectionReason'] = rejectionReason;
+      }
+      
+      await _firestore.collection('centers').doc(centreId).update(updateData);
+    } on FirebaseException catch (e) {
+      throw Exception('Failed to update centre status: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to update centre status: $e');
+    }
+  }
+
+  // Approve a centre
+  Future<void> approveCentre(String centreId) async {
+    await updateCentreStatus(centreId: centreId, status: 'approved');
+  }
+
+  // Reject a centre
+  Future<void> rejectCentre(String centreId, {String? reason}) async {
+    await updateCentreStatus(
+      centreId: centreId,
+      status: 'rejected',
+      rejectionReason: reason,
+    );
+  }
+
   // Stream of user's centres (for real-time updates)
   Stream<List<Map<String, dynamic>>> getUserCentresStream() {
     final user = currentUser;
