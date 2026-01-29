@@ -10,29 +10,43 @@ class AppointmentPage extends StatefulWidget {
   State<AppointmentPage> createState() => _AppointmentPageState();
 }
 
-class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProviderStateMixin {
+class _AppointmentPageState extends State<AppointmentPage>
+    with SingleTickerProviderStateMixin {
   static const Color primaryBlue = Color(0xFF90CAF9);
   static const Color darkBlue = Color(0xFF42A5F5);
   static const Color deepBlue = Color(0xFF1565C0);
   static const Color accentBlue = Color(0xFF1E88E5);
 
   final AppointmentService _appointmentService = AppointmentService();
-  
+
   DateTime? _selectedDate;
   String? _selectedTimeSlot;
   final TextEditingController _purposeController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   bool _isLoading = false;
-  
+  bool _isLoadingSlots = false;
+  Map<String, int> _timeSlotCounts = {};
+  static const int maxBookingsPerSlot = 20;
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
   final List<String> _timeSlots = [
-    '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
-    '11:00 AM', '11:30 AM', '12:00 PM', '02:00 PM',
-    '02:30 PM', '03:00 PM', '03:30 PM', '04:00 PM',
-    '04:30 PM', '05:00 PM',
+    '09:00 AM',
+    '09:30 AM',
+    '10:00 AM',
+    '10:30 AM',
+    '11:00 AM',
+    '11:30 AM',
+    '12:00 PM',
+    '02:00 PM',
+    '02:30 PM',
+    '03:00 PM',
+    '03:30 PM',
+    '04:00 PM',
+    '04:30 PM',
+    '05:00 PM',
   ];
 
   @override
@@ -45,12 +59,35 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
-    
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+        );
+
     _animationController.forward();
+  }
+
+  Future<void> _loadTimeSlotCounts() async {
+    if (_selectedDate == null) return;
+
+    setState(() {
+      _isLoadingSlots = true;
+    });
+
+    try {
+      final counts = await _appointmentService.getAllTimeSlotCounts(
+        centerId: widget.center['id'] ?? '',
+        date: _selectedDate!,
+      );
+      setState(() {
+        _timeSlotCounts = counts;
+        _isLoadingSlots = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingSlots = false;
+      });
+    }
   }
 
   @override
@@ -87,6 +124,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
         _selectedDate = picked;
         _selectedTimeSlot = null;
       });
+      _loadTimeSlotCounts();
     }
   }
 
@@ -101,6 +139,13 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
       return;
     }
 
+    // Check if slot is full
+    final currentBookings = _timeSlotCounts[_selectedTimeSlot] ?? 0;
+    if (currentBookings >= maxBookingsPerSlot) {
+      _showErrorSnackBar('This time slot is full. Please select another time.');
+      return;
+    }
+
     if (_purposeController.text.trim().isEmpty) {
       _showErrorSnackBar('Please enter the purpose of your visit');
       return;
@@ -109,10 +154,27 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
     setState(() => _isLoading = true);
 
     try {
+      // Double-check availability from server before booking
+      final isAvailable = await _appointmentService.isTimeSlotAvailable(
+        centerId: widget.center['id'] ?? '',
+        date: _selectedDate!,
+        time: _selectedTimeSlot!,
+      );
+
+      if (!isAvailable) {
+        _showErrorSnackBar(
+          'This time slot just became full. Please select another time.',
+        );
+        await _loadTimeSlotCounts();
+        setState(() => _isLoading = false);
+        return;
+      }
+
       await _appointmentService.bookAppointment(
         centerId: widget.center['id'] ?? '',
         centerName: widget.center['centreName'] ?? 'Unknown Center',
-        centerAddress: '${widget.center['address'] ?? ''}, ${widget.center['city'] ?? ''}, ${widget.center['state'] ?? ''}',
+        centerAddress:
+            '${widget.center['address'] ?? ''}, ${widget.center['city'] ?? ''}, ${widget.center['state'] ?? ''}',
         centerPhone: widget.center['contactPhone'] ?? '',
         appointmentDate: _selectedDate!,
         appointmentTime: _selectedTimeSlot!,
@@ -173,11 +235,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                   ),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 48,
-                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 48),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -200,7 +258,10 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
               ),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: primaryBlue.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
@@ -302,7 +363,10 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(20),
@@ -310,7 +374,11 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.business, size: 16, color: Colors.white),
+                                  const Icon(
+                                    Icons.business,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
                                   const SizedBox(width: 6),
                                   Text(
                                     widget.center['centreName'] ?? 'Center',
@@ -338,7 +406,11 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                 borderRadius: BorderRadius.circular(12),
               ),
               child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
@@ -363,7 +435,10 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                       const SizedBox(height: 12),
                       _buildTimeSlotGrid(),
                       const SizedBox(height: 24),
-                      _buildSectionHeader('Appointment Details', Icons.description_outlined),
+                      _buildSectionHeader(
+                        'Appointment Details',
+                        Icons.description_outlined,
+                      ),
                       const SizedBox(height: 12),
                       _buildPurposeField(),
                       const SizedBox(height: 16),
@@ -440,7 +515,11 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                   ),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(Icons.business, color: Colors.white, size: 28),
+                child: const Icon(
+                  Icons.business,
+                  color: Colors.white,
+                  size: 28,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -457,7 +536,10 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
@@ -486,13 +568,20 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
           const SizedBox(height: 16),
           const Divider(height: 1),
           const SizedBox(height: 16),
-          _buildInfoRow(Icons.location_on_outlined, 
-            '${widget.center['address'] ?? ''}, ${widget.center['city'] ?? ''}'
+          _buildInfoRow(
+            Icons.location_on_outlined,
+            '${widget.center['address'] ?? ''}, ${widget.center['city'] ?? ''}',
           ),
           const SizedBox(height: 10),
-          _buildInfoRow(Icons.phone_outlined, widget.center['contactPhone'] ?? 'N/A'),
+          _buildInfoRow(
+            Icons.phone_outlined,
+            widget.center['contactPhone'] ?? 'N/A',
+          ),
           const SizedBox(height: 10),
-          _buildInfoRow(Icons.email_outlined, widget.center['contactEmail'] ?? 'N/A'),
+          _buildInfoRow(
+            Icons.email_outlined,
+            widget.center['contactEmail'] ?? 'N/A',
+          ),
         ],
       ),
     );
@@ -506,10 +595,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
           ),
         ),
       ],
@@ -542,8 +628,8 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _selectedDate != null 
-                    ? darkBlue.withValues(alpha: 0.1) 
+                color: _selectedDate != null
+                    ? darkBlue.withValues(alpha: 0.1)
                     : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -560,10 +646,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                 children: [
                   Text(
                     _selectedDate != null ? 'Selected Date' : 'Choose Date',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -573,17 +656,15 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: _selectedDate != null ? Colors.black87 : Colors.grey,
+                      color: _selectedDate != null
+                          ? Colors.black87
+                          : Colors.grey,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(
-              Icons.arrow_forward_ios,
-              color: Colors.grey[400],
-              size: 18,
-            ),
+            Icon(Icons.arrow_forward_ios, color: Colors.grey[400], size: 18),
           ],
         ),
       ),
@@ -591,10 +672,29 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
   }
 
   String _formatDate(DateTime date) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 
-                  'Friday', 'Saturday', 'Sunday'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    const days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
     return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
@@ -613,13 +713,29 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
             const SizedBox(height: 12),
             Text(
               'Please select a date first',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
           ],
         ),
+      );
+    }
+
+    if (_isLoadingSlots) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: const Center(child: CircularProgressIndicator(color: darkBlue)),
       );
     }
 
@@ -636,36 +752,66 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
           ),
         ],
       ),
-      child: Wrap(
-        spacing: 10,
-        runSpacing: 10,
-        children: _timeSlots.map((time) => _buildTimeSlotChip(time)).toList(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 8),
+              Text(
+                'Max $maxBookingsPerSlot bookings per time slot',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: _timeSlots
+                .map((time) => _buildTimeSlotChip(time))
+                .toList(),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildTimeSlotChip(String time) {
     final isSelected = _selectedTimeSlot == time;
+    final currentBookings = _timeSlotCounts[time] ?? 0;
+    final availableSlots = maxBookingsPerSlot - currentBookings;
+    final isFull = currentBookings >= maxBookingsPerSlot;
+
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTimeSlot = time;
-        });
-      },
+      onTap: isFull
+          ? null
+          : () {
+              setState(() {
+                _selectedTimeSlot = time;
+              });
+            },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          gradient: isSelected
+          gradient: isFull
+              ? null
+              : isSelected
               ? const LinearGradient(
                   colors: [darkBlue, accentBlue],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
               : null,
-          color: isSelected ? null : Colors.grey.shade100,
+          color: isFull
+              ? Colors.grey.shade300
+              : isSelected
+              ? null
+              : Colors.grey.shade100,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
+          boxShadow: isSelected && !isFull
               ? [
                   BoxShadow(
                     color: darkBlue.withValues(alpha: 0.4),
@@ -675,13 +821,51 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                 ]
               : null,
         ),
-        child: Text(
-          time,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : Colors.grey[700],
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              time,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isFull
+                    ? Colors.grey[500]
+                    : isSelected
+                    ? Colors.white
+                    : Colors.grey[700],
+                decoration: isFull ? TextDecoration.lineThrough : null,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: isFull
+                    ? Colors.red.shade100
+                    : isSelected
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : availableSlots <= 5
+                    ? Colors.orange.shade100
+                    : Colors.green.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                isFull ? 'FULL' : '$availableSlots left',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: isFull
+                      ? Colors.red.shade700
+                      : isSelected
+                      ? Colors.white
+                      : availableSlots <= 5
+                      ? Colors.orange.shade700
+                      : Colors.green.shade700,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -721,7 +905,10 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
             borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: darkBlue, width: 2),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 18,
+          ),
         ),
       ),
     );
@@ -762,7 +949,10 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
             borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: darkBlue, width: 2),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 18,
+          ),
         ),
       ),
     );

@@ -185,6 +185,24 @@ class AppointmentService {
     required String time,
   }) async {
     try {
+      final count = await getTimeSlotBookingCount(
+        centerId: centerId,
+        date: date,
+        time: time,
+      );
+      return count < 20; // Max 20 bookings per 30-minute slot
+    } catch (e) {
+      return true; // Allow booking if check fails
+    }
+  }
+
+  // Get booking count for a specific time slot
+  Future<int> getTimeSlotBookingCount({
+    required String centerId,
+    required DateTime date,
+    required String time,
+  }) async {
+    try {
       final startOfDay = DateTime(date.year, date.month, date.day);
       final endOfDay = startOfDay.add(const Duration(days: 1));
 
@@ -196,9 +214,78 @@ class AppointmentService {
           .where('status', whereIn: ['pending', 'confirmed'])
           .get();
 
-      return existingAppointments.docs.isEmpty;
+      return existingAppointments.docs.length;
     } catch (e) {
-      return true; // Allow booking if check fails
+      return 0;
+    }
+  }
+
+  // Get all time slot booking counts for a date
+  Future<Map<String, int>> getAllTimeSlotCounts({
+    required String centerId,
+    required DateTime date,
+  }) async {
+    try {
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final appointments = await _appointmentsCollection
+          .where('centerId', isEqualTo: centerId)
+          .where('appointmentDate', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('appointmentDate', isLessThan: Timestamp.fromDate(endOfDay))
+          .where('status', whereIn: ['pending', 'confirmed'])
+          .get();
+
+      final Map<String, int> counts = {};
+      for (var doc in appointments.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final time = data['appointmentTime'] as String?;
+        if (time != null) {
+          counts[time] = (counts[time] ?? 0) + 1;
+        }
+      }
+      return counts;
+    } catch (e) {
+      return {};
+    }
+  }
+
+  // Approve appointment
+  Future<void> approveAppointment(String appointmentId) async {
+    try {
+      await _appointmentsCollection.doc(appointmentId).update({
+        'status': 'confirmed',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to approve appointment: $e');
+    }
+  }
+
+  // Reject appointment
+  Future<void> rejectAppointment(String appointmentId, {String? reason}) async {
+    try {
+      await _appointmentsCollection.doc(appointmentId).update({
+        'status': 'rejected',
+        'rejectionReason': reason ?? 'Rejected by center',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to reject appointment: $e');
+    }
+  }
+
+  // Get appointment status
+  Future<String?> getAppointmentStatus(String appointmentId) async {
+    try {
+      final doc = await _appointmentsCollection.doc(appointmentId).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        return data['status'] as String?;
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
   }
 }

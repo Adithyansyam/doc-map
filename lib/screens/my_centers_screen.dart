@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:akshaya_hub/services/centre_service.dart';
 import 'package:akshaya_hub/screens/register_akshaya_screen.dart';
 import 'package:akshaya_hub/services/notification_service.dart';
+import 'package:akshaya_hub/services/appointment_service.dart';
 
 class MyCentersScreen extends StatefulWidget {
   const MyCentersScreen({super.key});
@@ -18,6 +19,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
 
   final _centreService = CentreService();
   final _notificationService = NotificationService();
+  final _appointmentService = AppointmentService();
   late TabController _tabController;
 
   @override
@@ -371,6 +373,8 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
     final isRead = notification['isRead'] ?? false;
     final createdAt = notification['createdAt'] as dynamic;
     final timeAgo = createdAt != null ? _getTimeAgo(createdAt.toDate()) : '';
+    final appointmentId = notification['appointmentId'] as String?;
+    final appointmentStatus = notification['appointmentStatus'] as String? ?? 'pending';
 
     return Dismissible(
       key: Key(notification['id']),
@@ -413,105 +417,278 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
           ),
           child: Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [primaryBlue, darkBlue],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.event_available,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              notification['title'] ?? 'Notification',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: deepBlue,
-                              ),
-                            ),
-                          ),
-                          if (!isRead)
-                            Container(
-                              width: 10,
-                              height: 10,
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        notification['message'] ?? '',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: appointmentStatus == 'confirmed' 
+                              ? [Colors.green, Colors.green.shade700]
+                              : appointmentStatus == 'rejected'
+                                  ? [Colors.red, Colors.red.shade700]
+                                  : [primaryBlue, darkBlue],
                         ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
+                      child: Icon(
+                        appointmentStatus == 'confirmed' 
+                            ? Icons.check_circle
+                            : appointmentStatus == 'rejected'
+                                ? Icons.cancel
+                                : Icons.event_available,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: darkBlue.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.person_outline, size: 14, color: darkBlue),
-                                const SizedBox(width: 4),
-                                Text(
-                                  notification['userName'] ?? 'Unknown',
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  notification['title'] ?? 'Notification',
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: darkBlue,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: deepBlue,
                                   ),
                                 ),
-                              ],
+                              ),
+                              if (!isRead)
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            notification['message'] ?? '',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Icon(Icons.access_time, size: 14, color: Colors.grey[500]),
-                          const SizedBox(width: 4),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: darkBlue.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.person_outline, size: 14, color: darkBlue),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      notification['userName'] ?? 'Unknown',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: darkBlue,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(Icons.access_time, size: 14, color: Colors.grey[500]),
+                              const SizedBox(width: 4),
+                              Text(
+                                timeAgo,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                // Status Badge or Action Buttons
+                if (appointmentId != null) ...[
+                  const SizedBox(height: 12),
+                  const Divider(height: 1),
+                  const SizedBox(height: 12),
+                  if (appointmentStatus == 'pending')
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _approveAppointment(appointmentId, notification['id']),
+                            icon: const Icon(Icons.check, size: 18),
+                            label: const Text('Approve'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _rejectAppointment(appointmentId, notification['id']),
+                            icon: const Icon(Icons.close, size: 18),
+                            label: const Text('Reject'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: appointmentStatus == 'confirmed'
+                            ? Colors.green.withValues(alpha: 0.1)
+                            : Colors.red.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            appointmentStatus == 'confirmed' ? Icons.check_circle : Icons.cancel,
+                            size: 16,
+                            color: appointmentStatus == 'confirmed' ? Colors.green : Colors.red,
+                          ),
+                          const SizedBox(width: 6),
                           Text(
-                            timeAgo,
+                            appointmentStatus == 'confirmed' ? 'Approved' : 'Rejected',
                             style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: appointmentStatus == 'confirmed' ? Colors.green : Colors.red,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                ],
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _approveAppointment(String appointmentId, String notificationId) async {
+    try {
+      await _appointmentService.approveAppointment(appointmentId);
+      await _notificationService.updateNotificationStatus(notificationId, 'confirmed');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Appointment approved successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to approve: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _rejectAppointment(String appointmentId, String notificationId) async {
+    final reasonController = TextEditingController();
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reject Appointment'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Are you sure you want to reject this appointment?'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              decoration: InputDecoration(
+                hintText: 'Reason for rejection (optional)',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Reject', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      try {
+        await _appointmentService.rejectAppointment(
+          appointmentId,
+          reason: reasonController.text.isNotEmpty ? reasonController.text : null,
+        );
+        await _notificationService.updateNotificationStatus(notificationId, 'rejected');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Appointment rejected'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to reject: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   String _getTimeAgo(DateTime dateTime) {

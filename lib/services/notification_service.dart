@@ -118,6 +118,19 @@ class NotificationService {
     }
   }
 
+  // Update notification with appointment status
+  Future<void> updateNotificationStatus(String notificationId, String status) async {
+    try {
+      await _notificationsCollection.doc(notificationId).update({
+        'appointmentStatus': status,
+        'isRead': true,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to update notification status: $e');
+    }
+  }
+
   // Delete all notifications
   Future<void> deleteAllNotifications() async {
     if (currentUserId == null) return;
