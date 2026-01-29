@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'notification_service.dart';
 
 class AppointmentService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final NotificationService _notificationService = NotificationService();
 
   // Get current user ID
   String? get currentUserId => _auth.currentUser?.uid;
@@ -32,6 +34,11 @@ class AppointmentService {
       final userDoc = await _firestore.collection('users').doc(currentUserId).get();
       final userData = userDoc.data() as Map<String, dynamic>?;
 
+      // Get center details to find owner ID
+      final centerDoc = await _firestore.collection('centers').doc(centerId).get();
+      final centerData = centerDoc.data() as Map<String, dynamic>?;
+      final centerOwnerId = centerData?['ownerId'] ?? centerData?['userId'] ?? '';
+
       final appointmentData = {
         'userId': currentUserId,
         'userName': userData?['name'] ?? 'Unknown User',
@@ -51,6 +58,21 @@ class AppointmentService {
       };
 
       final docRef = await _appointmentsCollection.add(appointmentData);
+      
+      // Create notification for center owner
+      if (centerOwnerId.isNotEmpty) {
+        await _notificationService.createAppointmentNotification(
+          centerId: centerId,
+          centerOwnerId: centerOwnerId,
+          centerName: centerName,
+          userName: userData?['name'] ?? 'Unknown User',
+          appointmentId: docRef.id,
+          appointmentDate: appointmentDate,
+          appointmentTime: appointmentTime,
+          purpose: purpose,
+        );
+      }
+      
       return docRef.id;
     } catch (e) {
       throw Exception('Failed to book appointment: $e');

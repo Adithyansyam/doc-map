@@ -11,10 +11,10 @@ class AppointmentPage extends StatefulWidget {
 }
 
 class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProviderStateMixin {
-  static const Color primaryPurple = Color(0xFFCDABFF);
-  static const Color darkPurple = Color(0xFFB896E8);
-  static const Color deepPurple = Color(0xFF6A1B9A);
-  static const Color accentPurple = Color(0xFF9C27B0);
+  static const Color primaryBlue = Color(0xFF90CAF9);
+  static const Color darkBlue = Color(0xFF42A5F5);
+  static const Color deepBlue = Color(0xFF1565C0);
+  static const Color accentBlue = Color(0xFF1E88E5);
 
   final AppointmentService _appointmentService = AppointmentService();
   
@@ -71,7 +71,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: deepPurple,
+              primary: deepBlue,
               onPrimary: Colors.white,
               onSurface: Colors.black,
               surface: Colors.white,
@@ -185,7 +185,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: deepPurple,
+                  color: deepBlue,
                 ),
               ),
               const SizedBox(height: 12),
@@ -202,29 +202,29 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: primaryPurple.withValues(alpha: 0.2),
+                  color: primaryBlue.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.calendar_today, size: 18, color: deepPurple),
+                    const Icon(Icons.calendar_today, size: 18, color: deepBlue),
                     const SizedBox(width: 8),
                     Text(
                       '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: deepPurple,
+                        color: deepBlue,
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Icon(Icons.access_time, size: 18, color: deepPurple),
+                    const Icon(Icons.access_time, size: 18, color: deepBlue),
                     const SizedBox(width: 8),
                     Text(
                       _selectedTimeSlot!,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: deepPurple,
+                        color: deepBlue,
                       ),
                     ),
                   ],
@@ -239,7 +239,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: deepPurple,
+                    backgroundColor: deepBlue,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -265,7 +265,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F5FF),
+      backgroundColor: const Color(0xFFF5F9FF),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -278,7 +278,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
               background: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [deepPurple, accentPurple, darkPurple],
+                    colors: [deepBlue, accentBlue, darkBlue],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -389,7 +389,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [darkPurple, primaryPurple],
+              colors: [darkBlue, primaryBlue],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -403,7 +403,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: deepPurple,
+            color: deepBlue,
           ),
         ),
       ],
@@ -419,7 +419,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: deepPurple.withValues(alpha: 0.1),
+            color: deepBlue.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -434,7 +434,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [primaryPurple, darkPurple],
+                    colors: [primaryBlue, darkBlue],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -452,7 +452,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: deepPurple,
+                        color: deepBlue,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -501,7 +501,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: darkPurple),
+        Icon(icon, size: 18, color: darkBlue),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
@@ -526,7 +526,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: _selectedDate != null ? darkPurple : Colors.grey.shade300,
+            color: _selectedDate != null ? darkBlue : Colors.grey.shade300,
             width: _selectedDate != null ? 2 : 1,
           ),
           boxShadow: [
@@ -543,13 +543,13 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: _selectedDate != null 
-                    ? darkPurple.withValues(alpha: 0.1) 
+                    ? darkBlue.withValues(alpha: 0.1) 
                     : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 Icons.calendar_today,
-                color: _selectedDate != null ? darkPurple : Colors.grey,
+                color: _selectedDate != null ? darkBlue : Colors.grey,
                 size: 24,
               ),
             ),
@@ -658,7 +658,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
         decoration: BoxDecoration(
           gradient: isSelected
               ? const LinearGradient(
-                  colors: [darkPurple, accentPurple],
+                  colors: [darkBlue, accentBlue],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 )
@@ -668,7 +668,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: darkPurple.withValues(alpha: 0.4),
+                    color: darkBlue.withValues(alpha: 0.4),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -706,10 +706,10 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
           hintText: 'e.g., Document verification, New application...',
           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
           labelText: 'Purpose of Visit *',
-          labelStyle: const TextStyle(color: darkPurple),
+          labelStyle: const TextStyle(color: darkBlue),
           prefixIcon: const Padding(
             padding: EdgeInsets.only(left: 16, right: 12),
-            child: Icon(Icons.assignment_outlined, color: darkPurple),
+            child: Icon(Icons.assignment_outlined, color: darkBlue),
           ),
           filled: true,
           fillColor: Colors.white,
@@ -719,7 +719,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: darkPurple, width: 2),
+            borderSide: const BorderSide(color: darkBlue, width: 2),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         ),
@@ -747,10 +747,10 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
           hintText: 'Any additional information or special requests...',
           hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
           labelText: 'Additional Notes (Optional)',
-          labelStyle: const TextStyle(color: darkPurple),
+          labelStyle: const TextStyle(color: darkBlue),
           prefixIcon: const Padding(
             padding: EdgeInsets.only(left: 16, right: 12, bottom: 48),
-            child: Icon(Icons.note_alt_outlined, color: darkPurple),
+            child: Icon(Icons.note_alt_outlined, color: darkBlue),
           ),
           filled: true,
           fillColor: Colors.white,
@@ -760,7 +760,7 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: darkPurple, width: 2),
+            borderSide: const BorderSide(color: darkBlue, width: 2),
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         ),
@@ -775,13 +775,13 @@ class _AppointmentPageState extends State<AppointmentPage> with SingleTickerProv
       child: ElevatedButton(
         onPressed: _isLoading ? null : _bookAppointment,
         style: ElevatedButton.styleFrom(
-          backgroundColor: deepPurple,
+          backgroundColor: deepBlue,
           disabledBackgroundColor: Colors.grey.shade300,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
           elevation: 4,
-          shadowColor: deepPurple.withValues(alpha: 0.4),
+          shadowColor: deepBlue.withValues(alpha: 0.4),
         ),
         child: _isLoading
             ? const SizedBox(

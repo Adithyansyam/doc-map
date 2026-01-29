@@ -55,7 +55,7 @@ class _HomePageNavBarState extends State<HomePageNavBar>
           return CustomPaint(
             painter: AnimatedBorderPainter(
               animation: _animationController,
-              color: const Color(0xFFC097FC),
+              color: const Color(0xFF42A5F5),
             ),
             child: Container(
               height: 50,
@@ -102,14 +102,14 @@ class _HomePageNavBarState extends State<HomePageNavBar>
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFB07DFA).withOpacity(0.15)
+              ? const Color(0xFF1E88E5).withValues(alpha: 0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(15),
         ),
         child: Icon(
           icon,
           color: isSelected
-              ? const Color(0xFFB07DFA)
+              ? const Color(0xFF1E88E5)
               : Colors.grey[400],
           size: 22,
         ),

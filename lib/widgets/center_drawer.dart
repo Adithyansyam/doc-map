@@ -13,10 +13,10 @@ class CenterDrawer extends StatefulWidget {
 }
 
 class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderStateMixin {
-  static const Color primaryPurple = Color(0xFFCDABFF);
-  static const Color darkPurple = Color(0xFFB896E8);
-  static const Color deepPurple = Color(0xFF6A1B9A);
-  static const Color accentPurple = Color(0xFF9C27B0);
+  static const Color primaryBlue = Color(0xFF90CAF9);
+  static const Color darkBlue = Color(0xFF42A5F5);
+  static const Color deepBlue = Color(0xFF1565C0);
+  static const Color accentBlue = Color(0xFF1E88E5);
 
   late AnimationController _animationController;
   int? _selectedIndex;
@@ -58,7 +58,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             boxShadow: [
               BoxShadow(
-                color: deepPurple.withValues(alpha: 0.15),
+                color: deepBlue.withValues(alpha: 0.15),
                 blurRadius: 20,
                 offset: const Offset(0, -8),
               ),
@@ -76,7 +76,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                       height: 5,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [primaryPurple, darkPurple],
+                          colors: [primaryBlue, darkBlue],
                         ),
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -94,10 +94,11 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                 ),
               ),
               
-              // Header with gradient
-              SingleChildScrollView(
-                controller: scrollController,
-                physics: const ClampingScrollPhysics(),
+              // Header with gradient - wrap in Expanded to prevent overflow
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  physics: const ClampingScrollPhysics(),
                 child: Column(
                   children: [
                     Container(
@@ -106,15 +107,15 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            deepPurple.withValues(alpha: 0.1),
-                            primaryPurple.withValues(alpha: 0.1),
+                            deepBlue.withValues(alpha: 0.1),
+                            primaryBlue.withValues(alpha: 0.1),
                           ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: primaryPurple.withValues(alpha: 0.3),
+                          color: primaryBlue.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -124,14 +125,14 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [darkPurple, accentPurple],
+                                colors: [darkBlue, accentBlue],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: darkPurple.withValues(alpha: 0.3),
+                                  color: darkBlue.withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
@@ -153,7 +154,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: deepPurple,
+                                    color: deepBlue,
                                   ),
                                 ),
                                 Text(
@@ -215,11 +216,11 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                   Container(
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: primaryPurple.withValues(alpha: 0.1),
+                                      color: primaryBlue.withValues(alpha: 0.1),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const CircularProgressIndicator(
-                                      color: darkPurple,
+                                      color: darkBlue,
                                       strokeWidth: 3,
                                     ),
                                   ),
@@ -333,12 +334,13 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                   ],
                 ),
               ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   Widget _buildCenterCard(BuildContext context, Map<String, dynamic> center, double? distance, int index) {
     final isSelected = _selectedIndex == index;
@@ -384,13 +386,13 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? darkPurple : primaryPurple.withValues(alpha: 0.3),
+            color: isSelected ? darkBlue : primaryBlue.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
               color: isSelected 
-                  ? darkPurple.withValues(alpha: 0.2) 
+                  ? darkBlue.withValues(alpha: 0.2) 
                   : Colors.grey.withValues(alpha: 0.1),
               blurRadius: isSelected ? 16 : 10,
               offset: const Offset(0, 4),
@@ -406,7 +408,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    primaryPurple.withValues(alpha: 0.15),
+                    primaryBlue.withValues(alpha: 0.15),
                     Colors.white,
                   ],
                   begin: Alignment.topLeft,
@@ -420,14 +422,14 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [primaryPurple, darkPurple],
+                        colors: [primaryBlue, darkBlue],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: darkPurple.withValues(alpha: 0.3),
+                          color: darkBlue.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -449,7 +451,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: deepPurple,
+                            color: deepBlue,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -486,8 +488,8 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      darkPurple.withValues(alpha: 0.1),
-                                      primaryPurple.withValues(alpha: 0.1),
+                                      darkBlue.withValues(alpha: 0.1),
+                                      primaryBlue.withValues(alpha: 0.1),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(10),
@@ -498,7 +500,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                     const Icon(
                                       Icons.near_me_rounded,
                                       size: 10,
-                                      color: deepPurple,
+                                      color: deepBlue,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -506,7 +508,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                       style: const TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
-                                        color: deepPurple,
+                                        color: deepBlue,
                                       ),
                                     ),
                                   ],
@@ -522,13 +524,13 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: isSelected 
-                          ? darkPurple 
-                          : darkPurple.withValues(alpha: 0.1),
+                          ? darkBlue 
+                          : darkBlue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.arrow_forward_ios_rounded,
-                      color: isSelected ? Colors.white : darkPurple,
+                      color: isSelected ? Colors.white : darkBlue,
                       size: 16,
                     ),
                   ),
@@ -554,19 +556,19 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                         child: _buildDetailRow(
                           Icons.phone_outlined,
                           center['contactPhone'] ?? 'N/A',
-                          darkPurple,
+                          darkBlue,
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [darkPurple, accentPurple],
+                            colors: [darkBlue, accentBlue],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: darkPurple.withValues(alpha: 0.3),
+                              color: darkBlue.withValues(alpha: 0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -605,13 +607,13 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: primaryPurple.withValues(alpha: 0.1),
+            color: primaryBlue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
             size: 14,
-            color: darkPurple,
+            color: darkBlue,
           ),
         ),
         const SizedBox(width: 10),

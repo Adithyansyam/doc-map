@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:akshaya_hub/services/centre_service.dart';
 import 'package:akshaya_hub/screens/register_akshaya_screen.dart';
+import 'package:akshaya_hub/services/notification_service.dart';
 
 class MyCentersScreen extends StatefulWidget {
   const MyCentersScreen({super.key});
@@ -9,12 +10,27 @@ class MyCentersScreen extends StatefulWidget {
   State<MyCentersScreen> createState() => _MyCentersScreenState();
 }
 
-class _MyCentersScreenState extends State<MyCentersScreen> {
-  static const Color primaryPurple = Color(0xFFCDABFF);
-  static const Color lightPurple = Color(0xFFE8D9FF);
-  static const Color darkPurple = Color(0xFFB896E8);
+class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProviderStateMixin {
+  static const Color primaryBlue = Color(0xFF90CAF9);
+  static const Color lightBlue = Color(0xFFBBDEFB);
+  static const Color darkBlue = Color(0xFF42A5F5);
+  static const Color deepBlue = Color(0xFF1565C0);
 
   final _centreService = CentreService();
+  final _notificationService = NotificationService();
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,71 +40,89 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: primaryPurple),
+          icon: const Icon(Icons.arrow_back, color: primaryBlue),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'My Centers',
           style: TextStyle(
-            color: primaryPurple,
+            color: primaryBlue,
             fontWeight: FontWeight.bold,
           ),
         ),
-      ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _centreService.getUserCentresStream(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(
-                color: primaryPurple,
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: deepBlue,
+          unselectedLabelColor: Colors.grey,
+          indicatorColor: darkBlue,
+          indicatorWeight: 3,
+          tabs: [
+            const Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.business, size: 20),
+                  SizedBox(width: 4),
+                  Text('Center Details', style: TextStyle(fontSize: 13)),
+                ],
               ),
-            );
-          }
-
-          if (snapshot.hasError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 60,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error: ${snapshot.error}',
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {}); // Refresh
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryPurple,
+            ),
+            Tab(
+              child: StreamBuilder<int>(
+                stream: _notificationService.getUnreadNotificationCountStream(),
+                builder: (context, snapshot) {
+                  final unreadCount = snapshot.data ?? 0;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.notifications, size: 20),
+                          SizedBox(width: 4),
+                          Text('Notifications', style: TextStyle(fontSize: 13)),
+                        ],
                       ),
-                      child: const Text('Retry', style: TextStyle(color: Colors.white)),
-                    ),
-                  ],
-                ),
+                      if (unreadCount > 0)
+                        Positioned(
+                          right: -12,
+                          top: -8,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              unreadCount > 99 ? '99+' : '$unreadCount',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
-            );
-          }
-
-          final centers = snapshot.data ?? [];
-
-          if (centers.isEmpty) {
-            return _buildEmptyState();
-          }
-
-          // Show full details of the registered center
-          return _buildCenterDetailsView(centers.first);
-        },
+            ),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildCenterTab(),
+          _buildNotificationsTab(),
+        ],
       ),
       // Only show FAB when no center is registered
       floatingActionButton: StreamBuilder<List<Map<String, dynamic>>>(
@@ -105,7 +139,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
                   ),
                 );
               },
-              backgroundColor: primaryPurple,
+              backgroundColor: primaryBlue,
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'Register Center',
@@ -120,6 +154,381 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
         },
       ),
     );
+  }
+
+  Widget _buildCenterTab() {
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _centreService.getUserCentresStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: primaryBlue,
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 60,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: ${snapshot.error}',
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {}); // Refresh
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryBlue,
+                    ),
+                    child: const Text('Retry', style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final centers = snapshot.data ?? [];
+
+        if (centers.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        // Show full details of the registered center
+        return _buildCenterDetailsView(centers.first);
+      },
+    );
+  }
+
+  Widget _buildNotificationsTab() {
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _notificationService.getCenterNotificationsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: primaryBlue,
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error loading notifications',
+              style: TextStyle(color: Colors.red),
+            ),
+          );
+        }
+
+        final notifications = snapshot.data ?? [];
+
+        if (notifications.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: primaryBlue.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.notifications_off_outlined,
+                      size: 60,
+                      color: darkBlue,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No notifications yet',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: darkBlue,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'You\'ll receive notifications when customers book appointments',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          children: [
+            // Actions bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: primaryBlue.withValues(alpha: 0.1),
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${notifications.length} notification${notifications.length != 1 ? 's' : ''}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: darkBlue,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      TextButton.icon(
+                        onPressed: () async {
+                          await _notificationService.markAllAsRead();
+                        },
+                        icon: const Icon(Icons.done_all, size: 18),
+                        label: const Text('Mark all read'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: darkBlue,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Clear All'),
+                              content: const Text('Are you sure you want to delete all notifications?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, false),
+                                  child: const Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.red,
+                                  ),
+                                  child: const Text('Delete'),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm == true) {
+                            await _notificationService.deleteAllNotifications();
+                          }
+                        },
+                        icon: const Icon(Icons.delete_outline),
+                        color: Colors.red,
+                        tooltip: 'Clear all',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            // Notifications list
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: notifications.length,
+                itemBuilder: (context, index) {
+                  final notification = notifications[index];
+                  return _buildNotificationCard(notification);
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildNotificationCard(Map<String, dynamic> notification) {
+    final isRead = notification['isRead'] ?? false;
+    final createdAt = notification['createdAt'] as dynamic;
+    final timeAgo = createdAt != null ? _getTimeAgo(createdAt.toDate()) : '';
+
+    return Dismissible(
+      key: Key(notification['id']),
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction) {
+        _notificationService.deleteNotification(notification['id']);
+      },
+      child: GestureDetector(
+        onTap: () {
+          if (!isRead) {
+            _notificationService.markAsRead(notification['id']);
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: isRead ? Colors.white : primaryBlue.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isRead ? Colors.grey.shade300 : darkBlue.withValues(alpha: 0.3),
+              width: isRead ? 1 : 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [primaryBlue, darkBlue],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.event_available,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              notification['title'] ?? 'Notification',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: deepBlue,
+                              ),
+                            ),
+                          ),
+                          if (!isRead)
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        notification['message'] ?? '',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: darkBlue.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.person_outline, size: 14, color: darkBlue),
+                                const SizedBox(width: 4),
+                                Text(
+                                  notification['userName'] ?? 'Unknown',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: darkBlue,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(Icons.access_time, size: 14, color: Colors.grey[500]),
+                          const SizedBox(width: 4),
+                          Text(
+                            timeAgo,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 7) {
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return 'Just now';
+    }
   }
 
   Widget _buildEmptyState() {
@@ -155,17 +564,17 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: primaryPurple.withValues(alpha: 0.1),
+                color: primaryBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: primaryPurple.withValues(alpha: 0.3),
+                  color: primaryBlue.withValues(alpha: 0.3),
                 ),
               ),
               child: const Text(
                 'Note: You can only register one center per account',
                 style: TextStyle(
                   fontSize: 12,
-                  color: darkPurple,
+                  color: darkBlue,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -234,15 +643,15 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: lightPurple.withValues(alpha: 0.2),
+              color: lightBlue.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: primaryPurple.withValues(alpha: 0.3),
+                color: primaryBlue.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, color: primaryPurple, size: 24),
+                Icon(Icons.info_outline, color: primaryBlue, size: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -272,12 +681,12 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: primaryPurple.withValues(alpha: 0.2),
+          color: primaryBlue.withValues(alpha: 0.2),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: primaryPurple.withValues(alpha: 0.08),
+            color: primaryBlue.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -291,10 +700,10 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: primaryPurple.withValues(alpha: 0.1),
+                  color: primaryBlue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: primaryPurple, size: 24),
+                child: Icon(icon, color: primaryBlue, size: 24),
               ),
               const SizedBox(width: 12),
               Text(
@@ -302,7 +711,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: darkPurple,
+                  color: darkBlue,
                 ),
               ),
             ],
@@ -323,7 +732,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
           Icon(
             icon,
             size: 20,
-            color: primaryPurple.withValues(alpha: 0.7),
+            color: primaryBlue.withValues(alpha: 0.7),
           ),
           const SizedBox(width: 12),
           Expanded(

@@ -12,10 +12,10 @@ class RegisterAkshayaScreen extends StatefulWidget {
 
 class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with SingleTickerProviderStateMixin {
   // Modern Color Scheme
-  static const Color primaryPurple = Color(0xFFCDABFF);
-  static const Color lightPurple = Color(0xFFE8D9FF);
-  static const Color darkPurple = Color(0xFFB896E8);
-  static const Color accentColor = Color(0xFFCDABFF);
+  static const Color primaryBlue = Color(0xFF90CAF9);
+  static const Color lightBlue = Color(0xFFBBDEFB);
+  static const Color darkBlue = Color(0xFF42A5F5);
+  static const Color accentColor = Color(0xFF90CAF9);
   
   final _formKey = GlobalKey<FormState>();
   final _centreNameController = TextEditingController();
@@ -152,7 +152,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                     // Header
                     Row(
                       children: [
-                        Icon(Icons.map, color: primaryPurple, size: 28),
+                        Icon(Icons.map, color: primaryBlue, size: 28),
                         const SizedBox(width: 12),
                         const Expanded(
                           child: Text(
@@ -160,7 +160,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: darkPurple,
+                              color: darkBlue,
                             ),
                           ),
                         ),
@@ -174,12 +174,12 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: lightPurple.withOpacity(0.2),
+                        color: lightBlue.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.touch_app, size: 20, color: primaryPurple),
+                          Icon(Icons.touch_app, size: 20, color: primaryBlue),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -200,15 +200,15 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: primaryPurple.withOpacity(0.1),
+                          color: primaryBlue.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: primaryPurple.withOpacity(0.3),
+                            color: primaryBlue.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.location_on, color: primaryPurple, size: 20),
+                            Icon(Icons.location_on, color: primaryBlue, size: 20),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -284,7 +284,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryPurple,
+                          backgroundColor: primaryBlue,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -341,7 +341,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: primaryPurple),
+                      icon: const Icon(Icons.arrow_back, color: primaryBlue),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                     const SizedBox(width: 8),
@@ -350,7 +350,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: primaryPurple,
+                        color: primaryBlue,
                       ),
                     ),
                   ],
@@ -489,7 +489,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                                     ),
                                   ),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: primaryPurple,
+                                    backgroundColor: primaryBlue,
                                     padding: const EdgeInsets.symmetric(vertical: 14),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
@@ -544,12 +544,12 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: lightPurple.withOpacity(0.2),
+                                  color: lightBlue.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.info_outline, size: 16, color: primaryPurple),
+                                    Icon(Icons.info_outline, size: 16, color: primaryBlue),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
@@ -639,13 +639,13 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: primaryPurple.withOpacity(0.1),
+            color: primaryBlue.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: const Icon(
             Icons.app_registration,
             size: 50,
-            color: primaryPurple,
+            color: primaryBlue,
           ),
         ),
         const SizedBox(height: 16),
@@ -654,7 +654,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: darkPurple,
+            color: darkBlue,
           ),
           textAlign: TextAlign.center,
         ),
@@ -678,7 +678,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
   }) {
     return Card(
       elevation: 2,
-      shadowColor: primaryPurple.withOpacity(0.1),
+      shadowColor: primaryBlue.withOpacity(0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -692,12 +692,12 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: primaryPurple.withOpacity(0.1),
+                    color: primaryBlue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     icon,
-                    color: primaryPurple,
+                    color: primaryBlue,
                     size: 20,
                   ),
                 ),
@@ -707,7 +707,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: darkPurple,
+                    color: darkBlue,
                   ),
                 ),
               ],
@@ -736,7 +736,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.grey[600]),
-        prefixIcon: Icon(icon, color: primaryPurple),
+        prefixIcon: Icon(icon, color: primaryBlue),
         filled: true,
         fillColor: Colors.grey[50],
         border: OutlineInputBorder(
@@ -749,7 +749,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryPurple, width: 2),
+          borderSide: const BorderSide(color: primaryBlue, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -775,12 +775,12 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
           height: 56,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [primaryPurple, darkPurple],
+              colors: [primaryBlue, darkBlue],
             ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: primaryPurple.withOpacity(0.3),
+                color: primaryBlue.withOpacity(0.3),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),

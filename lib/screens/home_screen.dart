@@ -55,9 +55,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+    if (index == 1) {
+      // Navigate to My Centers Screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MyCentersScreen()),
+      );
+    } else if (index == 2) {
+      // Navigate to Profile Screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      );
+    } else {
+      setState(() {
+        _currentIndex = index;
+      });
+    }
   }
 
   Future<void> _showLocationPermissionDialog() async {
@@ -85,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
             title: Row(
               children: [
-                Icon(Icons.location_on, color: Color(0xFF9C27B0), size: 28),
+                Icon(Icons.location_on, color: Color(0xFF1E88E5), size: 28),
                 SizedBox(width: 10),
                 Text('Enable Location'),
               ],
@@ -101,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   await _requestLocationPermission();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF9C27B0),
+                  backgroundColor: Color(0xFF1E88E5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -223,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   _requestLocationPermission();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF9C27B0),
+                  backgroundColor: Color(0xFF1E88E5),
                   foregroundColor: Colors.white,
                 ),
                 child: Text('Retry'),
@@ -257,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   openAppSettings();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF9C27B0),
+                  backgroundColor: Color(0xFF1E88E5),
                   foregroundColor: Colors.white,
                 ),
                 child: Text('Open Settings'),
@@ -311,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline, color: Color(0xFF9C27B0)),
+                      Icon(Icons.info_outline, color: Color(0xFF1E88E5)),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -331,7 +345,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   await Geolocator.openLocationSettings();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF9C27B0),
+                  backgroundColor: Color(0xFF1E88E5),
                   foregroundColor: Colors.white,
                 ),
                 child: Text('Open Settings Again'),
@@ -358,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 },
                 child: Text(
                   'I\'ve Enabled It',
-                  style: TextStyle(color: Color(0xFF9C27B0)),
+                  style: TextStyle(color: Color(0xFF1E88E5)),
                 ),
               ),
             ],
@@ -427,13 +441,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF9C27B0),
+                              color: Color(0xFF1E88E5),
                             ),
                           ),
                         ),
                         Icon(
                           Icons.location_pin,
-                          color: Color(0xFF9C27B0),
+                          color: Color(0xFF1E88E5),
                           size: 40,
                         ),
                       ],
@@ -622,7 +636,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       CircularProgressIndicator(
-                        color: Color(0xFF9C27B0),
+                        color: Color(0xFF1E88E5),
                       ),
                       SizedBox(height: 16),
                       Text('Getting your location...'),
@@ -641,7 +655,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onPressed: () {
                 _mapController.move(_currentLocation!, 15.0);
               },
-              backgroundColor: Color(0xFF9C27B0),
+              backgroundColor: Color(0xFF1E88E5),
               child: Icon(Icons.my_location, color: Colors.white),
             ),
           ),
@@ -814,52 +828,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildRegisterContent() {
-    // Navigate to My Centers Screen
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_currentIndex == 1) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MyCentersScreen()),
-        ).then((_) {
-          // Reset to home tab when returning from my centers
-          setState(() {
-            _currentIndex = 0;
-          });
-        });
-      }
-    });
-    
+    // This should not be called now as navigation happens in _onItemTapped
     return Container(
       color: Colors.white,
       child: const Center(
         child: CircularProgressIndicator(
-          color: Color(0xFF9C27B0),
+          color: Color(0xFF1E88E5),
         ),
       ),
     );
   }
 
   Widget _buildProfileContent() {
-    // Navigate to dedicated ProfileScreen
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_currentIndex == 2) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ProfileScreen()),
-        ).then((_) {
-          // Reset to home tab when returning from profile
-          setState(() {
-            _currentIndex = 0;
-          });
-        });
-      }
-    });
-    
+    // This should not be called now as navigation happens in _onItemTapped
     return Container(
       color: Colors.white,
       child: const Center(
         child: CircularProgressIndicator(
-          color: Color(0xFF9C27B0),
+          color: Color(0xFF1E88E5),
         ),
       ),
     );
@@ -867,23 +853,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    Widget currentContent;
-    switch (_currentIndex) {
-      case 0:
-        currentContent = _buildHomeContent();
-        break;
-      case 1:
-        currentContent = _buildRegisterContent();
-        break;
-      case 2:
-        currentContent = _buildProfileContent();
-        break;
-      default:
-        currentContent = _buildHomeContent();
-    }
-    
+    // Always show home content since other tabs navigate to separate screens
     return Scaffold(
-      body: currentContent,
+      body: _buildHomeContent(),
       bottomNavigationBar: HomePageNavBar(
         currentIndex: _currentIndex,
         onTap: _onItemTapped,

@@ -83,8 +83,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       shape: BoxShape.circle,
                       gradient: const LinearGradient(
                         colors: [
-                          Color(0xFF9C27B0),
-                          Color(0xFF7B1FA2),
+                          Color(0xFF1E88E5),
+                          Color(0xFF1565C0),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -156,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // Menu Items
                   _buildMenuItem(
                     icon: Icons.edit_outlined,
-                    iconColor: const Color(0xFF9C27B0),
+                    iconColor: const Color(0xFF1E88E5),
                     title: 'Edit Profile',
                     onTap: () {
                       Navigator.push(
@@ -170,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   
                   _buildMenuItem(
                     icon: Icons.settings_outlined,
-                    iconColor: const Color(0xFF9C27B0),
+                    iconColor: const Color(0xFF1E88E5),
                     title: 'Settings',
                     onTap: () {
                       // TODO: Navigate to settings screen
@@ -182,7 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   
                   _buildMenuItem(
                     icon: Icons.notifications_outlined,
-                    iconColor: const Color(0xFF9C27B0),
+                    iconColor: const Color(0xFF1E88E5),
                     title: 'Notifications',
                     onTap: () {
                       // TODO: Navigate to notifications screen
@@ -194,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   
                   _buildMenuItem(
                     icon: Icons.lock_outline,
-                    iconColor: const Color(0xFF9C27B0),
+                    iconColor: const Color(0xFF1E88E5),
                     title: 'Privacy & Security',
                     onTap: () {
                       // TODO: Navigate to privacy screen

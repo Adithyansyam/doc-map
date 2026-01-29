@@ -10,11 +10,16 @@ service cloud.firestore {
     }
     
     // Centers collection - anyone authenticated can read, only center owners can write
-    match /centres/{centreId} {
+    match /centers/{centerId} {
+      // Allow read for all authenticated users (for listing and queries)
       allow read: if request.auth != null;
+      
+      // Allow create for authenticated users
       allow create: if request.auth != null;
+      
+      // Allow update/delete only by the owner
       allow update, delete: if request.auth != null && 
-                             resource.data.ownerId == request.auth.uid;
+                             resource.data.userId == request.auth.uid;
     }
     
     // Appointments collection - users can create and manage their own appointments
@@ -37,6 +42,21 @@ service cloud.firestore {
       
       allow delete: if request.auth != null && 
                        resource.data.userId == request.auth.uid;
+    }
+    
+    // Notifications collection - center owners can read and manage their notifications
+    match /notifications/{notificationId} {
+      // Allow list queries for authenticated users (filtered by centerOwnerId in app)
+      // Note: Firestore rules can't filter list queries, so we allow read for authenticated users
+      // The app filters by centerOwnerId in the query
+      allow read: if request.auth != null;
+      
+      // Anyone authenticated can create notifications (for appointment bookings)
+      allow create: if request.auth != null;
+      
+      // Center owners can update/delete their own notifications
+      allow update, delete: if request.auth != null && 
+                               resource.data.centerOwnerId == request.auth.uid;
     }
     
     // Default deny all other collections
