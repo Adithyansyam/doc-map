@@ -4,9 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'login_screen.dart';
 import 'profile_screen.dart';
-import 'register_akshaya_screen.dart';
 import 'my_centers_screen.dart';
 import '../widgets/homepage_navbar.dart';
 import '../widgets/center_drawer.dart';
@@ -157,7 +155,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       // Get current position
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
 
       setState(() {
@@ -277,6 +277,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // Immediately open location settings
     await Geolocator.openLocationSettings();
     
+    if (!mounted) return;
+    
     // Show a persistent dialog that explains what's happening
     showDialog(
       context: context,
@@ -339,11 +341,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   // Check if location is now enabled
                   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
                   if (serviceEnabled) {
+                    if (!context.mounted) return;
                     Navigator.of(context, rootNavigator: true).pop();
                     _isDialogShowing = false;
                     _getCurrentLocation();
                   } else {
                     // Show a snackbar if still disabled
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Location is still disabled. Please enable it to continue.'),
@@ -472,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Color(0xFFCDABFF).withOpacity(0.5),
+                                    color: Color(0xFFCDABFF).withValues(alpha: 0.5),
                                     blurRadius: 8,
                                     spreadRadius: 2,
                                     offset: Offset(0, 2),
@@ -669,7 +673,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Container(
                   padding: EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Color(0xFFCDABFF).withOpacity(0.2),
+                    color: Color(0xFFCDABFF).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -704,10 +708,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: statusColor.withOpacity(0.1),
+                              color: statusColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: statusColor.withOpacity(0.5),
+                                color: statusColor.withValues(alpha: 0.5),
                                 width: 1,
                               ),
                             ),

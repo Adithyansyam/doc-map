@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:akshaya_hub/main.dart';
+import 'package:akshaya_hub/screens/home_screen.dart';
 
 void main() {
-  testWidgets('HomePage has welcome text', (WidgetTester tester) async {
+  testWidgets('HomeScreen has welcome text', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MaterialApp(
-      home: HomePage(),
+      home: HomeScreen(),
     ));
 
     // Verify that our welcome text is displayed

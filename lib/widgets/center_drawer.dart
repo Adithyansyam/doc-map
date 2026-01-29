@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import '../services/centre_service.dart';
+import '../screens/appointment_page.dart';
 
 class CenterDrawer extends StatelessWidget {
   final LatLng? userLocation;
@@ -147,7 +148,7 @@ class CenterDrawer extends StatelessWidget {
                           );
                         }
 
-                        return _buildCenterCard(center, distance);
+                        return _buildCenterCard(context, center, distance);
                       },
                     );
                   },
@@ -160,8 +161,17 @@ class CenterDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildCenterCard(Map<String, dynamic> center, double? distance) {
-    return Card(
+  Widget _buildCenterCard(BuildContext context, Map<String, dynamic> center, double? distance) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AppointmentPage(center: center),
+          ),
+        );
+      },
+      child: Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -264,6 +274,7 @@ class CenterDrawer extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

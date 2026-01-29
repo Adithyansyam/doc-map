@@ -81,7 +81,6 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
           }
 
           final centers = snapshot.data ?? [];
-          final hasCenter = centers.isNotEmpty;
 
           if (centers.isEmpty) {
             return _buildEmptyState();
@@ -156,10 +155,10 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: primaryPurple.withOpacity(0.1),
+                color: primaryPurple.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: primaryPurple.withOpacity(0.3),
+                  color: primaryPurple.withValues(alpha: 0.3),
                 ),
               ),
               child: const Text(
@@ -235,10 +234,10 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: lightPurple.withOpacity(0.2),
+              color: lightPurple.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: primaryPurple.withOpacity(0.3),
+                color: primaryPurple.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
@@ -273,12 +272,12 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: primaryPurple.withOpacity(0.2),
+          color: primaryPurple.withValues(alpha: 0.2),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: primaryPurple.withOpacity(0.08),
+            color: primaryPurple.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -292,7 +291,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: primaryPurple.withOpacity(0.1),
+                  color: primaryPurple.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: primaryPurple, size: 24),
@@ -324,7 +323,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
           Icon(
             icon,
             size: 20,
-            color: primaryPurple.withOpacity(0.7),
+            color: primaryPurple.withValues(alpha: 0.7),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -354,30 +353,5 @@ class _MyCentersScreenState extends State<MyCentersScreen> {
         ],
       ),
     );
-  }
-
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return Colors.green;
-      case 'rejected':
-        return Colors.red;
-      case 'pending':
-      default:
-        return Colors.orange;
-    }
-  }
-
-  IconData _getStatusIcon(String status) {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return Icons.check_circle;
-      case 'rejected':
-        return Icons.cancel;
-      case 'pending':
-      default:
-        return Icons.pending;
-    }
   }
 }
