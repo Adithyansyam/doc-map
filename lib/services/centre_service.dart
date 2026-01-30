@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'notification_service.dart';
 
 class CentreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final NotificationService _notificationService = NotificationService();
 
   // Get current user
   User? get currentUser => _auth.currentUser;
@@ -188,13 +190,23 @@ class CentreService {
     }
   }
 
-  // Update centre status (approve/reject)
+  // Update centre status (approve/reject) and send notification
   Future<void> updateCentreStatus({
     required String centreId,
     required String status,
     String? rejectionReason,
   }) async {
     try {
+      // Get center data first to get userId and centerName
+      final centerDoc = await _firestore.collection('centers').doc(centreId).get();
+      if (!centerDoc.exists) {
+        throw Exception('Center not found');
+      }
+      
+      final centerData = centerDoc.data()!;
+      final userId = centerData['userId'] as String?;
+      final centerName = centerData['centreName'] as String? ?? 'Unknown Center';
+      
       final updateData = {
         'status': status,
         'updatedAt': FieldValue.serverTimestamp(),
@@ -205,6 +217,17 @@ class CentreService {
       }
       
       await _firestore.collection('centers').doc(centreId).update(updateData);
+      
+      // Send notification to center owner
+      if (userId != null) {
+        await _notificationService.createCenterStatusNotification(
+          userId: userId,
+          centerId: centreId,
+          centerName: centerName,
+          status: status,
+          rejectionReason: rejectionReason,
+        );
+      }
     } on FirebaseException catch (e) {
       throw Exception('Failed to update centre status: ${e.message}');
     } catch (e) {

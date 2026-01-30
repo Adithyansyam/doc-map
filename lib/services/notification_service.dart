@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'push_notification_service.dart';
 
 class NotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final PushNotificationService _pushService = PushNotificationService();
 
   String? get currentUserId => _auth.currentUser?.uid;
 
@@ -290,6 +292,54 @@ class NotificationService {
       await _notificationsCollection.doc(notificationId).delete();
     } catch (e) {
       throw Exception('Failed to delete notification: $e');
+    }
+  }
+
+  // Create notification for center status change (approved/rejected)
+  Future<void> createCenterStatusNotification({
+    required String userId,
+    required String centerId,
+    required String centerName,
+    required String status, // 'approved' or 'rejected'
+    String? rejectionReason,
+  }) async {
+    try {
+      String title;
+      String message;
+      
+      if (status == 'approved') {
+        title = 'Center Approved! 🎉';
+        message = 'Congratulations! Your center "$centerName" has been approved and is now visible to all users on the map.';
+      } else {
+        title = 'Center Rejected';
+        message = 'Your center "$centerName" has been rejected.';
+        if (rejectionReason != null && rejectionReason.isNotEmpty) {
+          message += ' Reason: $rejectionReason';
+        }
+      }
+      
+      // Save notification to Firestore
+      await _notificationsCollection.add({
+        'userId': userId,
+        'type': 'center_status',
+        'title': title,
+        'message': message,
+        'centerId': centerId,
+        'centerName': centerName,
+        'centerStatus': status,
+        'rejectionReason': rejectionReason,
+        'isRead': false,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      // Show push notification
+      await _pushService.showCenterStatusNotification(
+        centerName: centerName,
+        status: status,
+        rejectionReason: rejectionReason,
+      );
+    } catch (e) {
+      print('Failed to create center status notification: $e');
     }
   }
 }
