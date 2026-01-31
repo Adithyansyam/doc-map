@@ -154,7 +154,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: deepYellow,
+                                    color: Colors.black87,
                                   ),
                                 ),
                                 Text(
@@ -455,7 +455,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: deepYellow,
+                            color: Colors.black87,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -504,7 +504,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                     const Icon(
                                       Icons.near_me_rounded,
                                       size: 10,
-                                      color: deepYellow,
+                                      color: Colors.black87,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -512,7 +512,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                       style: const TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
-                                        color: deepYellow,
+                                        color: Colors.black87,
                                       ),
                                     ),
                                   ],
@@ -560,7 +560,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                         child: _buildDetailRow(
                           Icons.phone_outlined,
                           center['contactPhone'] ?? 'N/A',
-                          darkYellow,
+                          Colors.black87,
                         ),
                       ),
                       Container(
