@@ -63,12 +63,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         MaterialPageRoute(builder: (context) => const MyCentersScreen()),
       );
     } else if (index == 2) {
-      // Navigate to Profile Screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
-      );
-    } else if (index == 3) {
       // Navigate to Search Screen
       Navigator.push(
         context,

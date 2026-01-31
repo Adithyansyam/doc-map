@@ -11,8 +11,9 @@ class AppointmentPage extends StatefulWidget {
 }
 
 class _AppointmentPageState extends State<AppointmentPage> {
-  static const Color primaryBlue = Color(0xFF4A7FFF);
-  static const Color darkBlue = Color(0xFF3D6FE8);
+  static const Color primaryYellow = Color(0xFFE8E45E);
+  static const Color darkYellow = Color(0xFFB5A642);
+  static const Color lightYellow = Color(0xFFF8F6F0);
 
   final AppointmentService _appointmentService = AppointmentService();
 
@@ -82,8 +83,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: primaryBlue,
-              onPrimary: Colors.white,
+              primary: primaryYellow,
+              onPrimary: Colors.black87,
               onSurface: Colors.black,
               surface: Colors.white,
             ),
@@ -215,7 +216,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: primaryBlue,
+                  color: primaryYellow,
                 ),
               ),
               const SizedBox(height: 12),
@@ -235,29 +236,29 @@ class _AppointmentPageState extends State<AppointmentPage> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: primaryBlue.withValues(alpha: 0.1),
+                  color: primaryYellow.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.calendar_today, size: 18, color: primaryBlue),
+                    const Icon(Icons.calendar_today, size: 18, color: primaryYellow),
                     const SizedBox(width: 8),
                     Text(
                       '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: primaryBlue,
+                        color: primaryYellow,
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Icon(Icons.access_time, size: 18, color: primaryBlue),
+                    const Icon(Icons.access_time, size: 18, color: primaryYellow),
                     const SizedBox(width: 8),
                     Text(
                       _selectedTimeSlot!,
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: primaryBlue,
+                        color: primaryYellow,
                       ),
                     ),
                   ],
@@ -272,7 +273,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryBlue,
+                    backgroundColor: primaryYellow,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -310,15 +311,15 @@ class _AppointmentPageState extends State<AppointmentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: lightYellow,
       body: Stack(
         children: [
-          // Blue header background
+          // Yellow header background
           Container(
             height: 280,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [primaryBlue, darkBlue],
+                colors: [primaryYellow, darkYellow],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -336,11 +337,11 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Colors.black.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ),
@@ -358,7 +359,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.black87,
                       ),
                     ),
                   ),
@@ -374,18 +375,18 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: Colors.black.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.business, size: 16, color: Colors.white),
+                          const Icon(Icons.business, size: 16, color: Colors.black87),
                           const SizedBox(width: 6),
                           Text(
                             widget.center['centreName'] ?? 'Center',
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Colors.black87,
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                             ),
@@ -434,7 +435,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                         // Continue Booking button
                         _buildContinueButton(),
                         
-                        const SizedBox(height: 100),
+                        const SizedBox(height: 40),
                       ],
                     ),
                   ),
@@ -444,7 +445,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -470,10 +470,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: primaryBlue.withValues(alpha: 0.1),
+                  color: primaryYellow.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.business, color: primaryBlue, size: 24),
+                child: const Icon(Icons.business, color: primaryYellow, size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -545,7 +545,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
   Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, color: primaryBlue, size: 20),
+        Icon(icon, color: primaryYellow, size: 20),
         const SizedBox(width: 8),
         Text(
           title,
@@ -617,10 +617,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: primaryBlue.withValues(alpha: 0.1),
+                color: primaryYellow.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.calendar_today, size: 32, color: primaryBlue),
+              child: Icon(Icons.calendar_today, size: 32, color: primaryYellow),
             ),
             const SizedBox(height: 16),
             Text(
@@ -639,7 +639,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Center(child: CircularProgressIndicator(color: primaryBlue)),
+        child: const Center(child: CircularProgressIndicator(color: primaryYellow)),
       );
     }
 
@@ -674,11 +674,11 @@ class _AppointmentPageState extends State<AppointmentPage> {
           color: isFull
               ? Colors.grey[200]
               : isSelected
-              ? primaryBlue
+              ? primaryYellow
               : Colors.grey[100],
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? primaryBlue : Colors.transparent,
+            color: isSelected ? primaryYellow : Colors.transparent,
             width: 2,
           ),
         ),
@@ -719,7 +719,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: primaryBlue, width: 2),
+                borderSide: const BorderSide(color: primaryYellow, width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -737,7 +737,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
-                borderSide: const BorderSide(color: primaryBlue, width: 2),
+                borderSide: const BorderSide(color: primaryYellow, width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             ),
@@ -754,7 +754,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _bookAppointment,
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryBlue,
+          backgroundColor: primaryYellow,
           disabledBackgroundColor: Colors.grey[300],
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -786,62 +786,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 ],
               ),
       ),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return Container(
-      height: 70,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.home, 'HOME', false),
-          _buildNavItem(Icons.history, 'HISTORY', false),
-          Container(
-            width: 56,
-            height: 56,
-            decoration: const BoxDecoration(
-              color: primaryBlue,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.add, color: Colors.white, size: 28),
-          ),
-          _buildNavItem(Icons.chat_bubble_outline, 'CHAT', false),
-          _buildNavItem(Icons.person_outline, 'PROFILE', false),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          color: isActive ? primaryBlue : Colors.grey[400],
-          size: 24,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: isActive ? primaryBlue : Colors.grey[400],
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
     );
   }
 }

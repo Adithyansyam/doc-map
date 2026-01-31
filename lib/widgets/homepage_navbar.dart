@@ -76,16 +76,10 @@ class _HomePageNavBarState extends State<HomePageNavBar>
                     isSelected: widget.currentIndex == 1,
                   ),
                   _buildNavItem(
-                    icon: Icons.person,
-                    label: 'Profile',
-                    index: 2,
-                    isSelected: widget.currentIndex == 2,
-                  ),
-                  _buildNavItem(
                     icon: Icons.search,
                     label: 'Search',
-                    index: 3,
-                    isSelected: widget.currentIndex == 3,
+                    index: 2,
+                    isSelected: widget.currentIndex == 2,
                   ),
                 ],
               ),

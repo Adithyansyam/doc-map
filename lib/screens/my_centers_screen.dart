@@ -36,12 +36,6 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else if (index == 2) {
-      // Navigate to Profile Screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
-      );
-    } else if (index == 3) {
       // Navigate to Search Screen
       Navigator.pushReplacement(
         context,

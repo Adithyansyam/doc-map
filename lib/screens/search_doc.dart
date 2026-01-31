@@ -12,7 +12,7 @@ class SearchDoc extends StatefulWidget {
 }
 
 class _SearchDocState extends State<SearchDoc> {
-  int _currentIndex = 3;
+  int _currentIndex = 2;
   final TextEditingController _searchController = TextEditingController();
 
   final List<Map<String, dynamic>> _products = [
@@ -64,11 +64,6 @@ class _SearchDocState extends State<SearchDoc> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MyCentersScreen()),
-      );
-    } else if (index == 2) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
     } else {
       setState(() {
