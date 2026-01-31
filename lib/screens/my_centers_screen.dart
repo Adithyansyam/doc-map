@@ -8,6 +8,7 @@ import '../widgets/homepage_navbar.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'search_doc.dart';
+import 'document_details_screen.dart';
 
 class MyCentersScreen extends StatefulWidget {
   const MyCentersScreen({super.key});
@@ -920,6 +921,46 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                   ),
                 ),
               ],
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // New Document Details Button
+          SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DocumentDetailsScreen(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryYellow,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 2,
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.description, color: Colors.black87, size: 22),
+                  SizedBox(width: 12),
+                  Text(
+                    'New Document Details',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           
