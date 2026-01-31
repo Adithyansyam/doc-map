@@ -44,7 +44,7 @@ class _UserNotificationsScreenState extends State<UserNotificationsScreen> {
               if (value == 'mark_all_read') {
                 await _notificationService.markAllUserNotificationsAsRead();
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(this.context).showSnackBar(
                     const SnackBar(content: Text('All notifications marked as read')),
                   );
                 }

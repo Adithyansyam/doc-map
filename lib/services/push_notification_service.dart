@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -38,79 +37,104 @@ class PushNotificationService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    // Request permission
-    await _requestPermission();
+    try {
+      // Skip FCM setup on web - FCM web requires additional config
+      if (kIsWeb) {
+        debugPrint('Push notifications: Web platform - skipping FCM setup');
+        _isInitialized = true;
+        return;
+      }
 
-    // Initialize local notifications
-    await _initializeLocalNotifications();
+      // Request permission
+      await _requestPermission();
 
-    // Set up foreground message handler
-    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+      // Initialize local notifications (mobile only)
+      await _initializeLocalNotifications();
 
-    // Set up background message handler
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+      // Set up foreground message handler
+      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
-    // Handle notification tap when app is in background/terminated
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
+      // Set up background message handler
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-    // Check if app was opened from a notification
-    final initialMessage = await _messaging.getInitialMessage();
-    if (initialMessage != null) {
-      _handleNotificationTap(initialMessage);
+      // Handle notification tap when app is in background/terminated
+      FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
+
+      // Check if app was opened from a notification
+      final initialMessage = await _messaging.getInitialMessage();
+      if (initialMessage != null) {
+        _handleNotificationTap(initialMessage);
+      }
+
+      // Save FCM token to Firestore
+      await _saveTokenToFirestore();
+
+      // Listen for token refresh
+      _messaging.onTokenRefresh.listen(_updateTokenInFirestore);
+
+      _isInitialized = true;
+      debugPrint('Push notification service initialized successfully');
+    } catch (e) {
+      debugPrint('Error initializing push notifications: $e');
+      // Still mark as initialized to prevent repeated attempts
+      _isInitialized = true;
     }
-
-    // Save FCM token to Firestore
-    await _saveTokenToFirestore();
-
-    // Listen for token refresh
-    _messaging.onTokenRefresh.listen(_updateTokenInFirestore);
-
-    _isInitialized = true;
-    debugPrint('Push notification service initialized');
   }
 
   /// Request notification permission
   Future<void> _requestPermission() async {
-    final settings = await _messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
+    try {
+      final settings = await _messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
 
-    debugPrint('Notification permission status: ${settings.authorizationStatus}');
+      debugPrint('Notification permission status: ${settings.authorizationStatus}');
+    } catch (e) {
+      debugPrint('Error requesting notification permission: $e');
+    }
   }
 
   /// Initialize local notifications for foreground messages
   Future<void> _initializeLocalNotifications() async {
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+    if (kIsWeb) return;
 
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
+    try {
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const iosSettings = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
 
-    await _localNotifications.initialize(
-      initSettings,
-      onDidReceiveNotificationResponse: (response) {
-        debugPrint('Local notification tapped: ${response.payload}');
-        // Handle notification tap
-      },
-    );
+      const initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
 
-    // Create Android notification channel
-    if (Platform.isAndroid) {
-      await _localNotifications
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(_channel);
+      await _localNotifications.initialize(
+        initSettings,
+        onDidReceiveNotificationResponse: (response) {
+          debugPrint('Local notification tapped: ${response.payload}');
+          // Handle notification tap
+        },
+      );
+
+      // Create Android notification channel
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        await _localNotifications
+            .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+            ?.createNotificationChannel(_channel);
+      }
+      
+      debugPrint('Local notifications initialized');
+    } catch (e) {
+      debugPrint('Error initializing local notifications: $e');
     }
   }
 
@@ -134,34 +158,45 @@ class PushNotificationService {
     required String body,
     String? payload,
   }) async {
-    const androidDetails = AndroidNotificationDetails(
-      'akshaya_hub_channel',
-      'Akshaya Hub Notifications',
-      channelDescription: 'Notifications for center approval status and appointments',
-      importance: Importance.high,
-      priority: Priority.high,
-      showWhen: true,
-      icon: '@mipmap/ic_launcher',
-    );
+    if (kIsWeb) {
+      debugPrint('Local notification (web): $title - $body');
+      return;
+    }
 
-    const iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
+    try {
+      const androidDetails = AndroidNotificationDetails(
+        'akshaya_hub_channel',
+        'Akshaya Hub Notifications',
+        channelDescription: 'Notifications for center approval status and appointments',
+        importance: Importance.high,
+        priority: Priority.high,
+        showWhen: true,
+        icon: '@mipmap/ic_launcher',
+      );
 
-    const details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
 
-    await _localNotifications.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      title,
-      body,
-      details,
-      payload: payload,
-    );
+      const details = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await _localNotifications.show(
+        DateTime.now().millisecondsSinceEpoch.remainder(100000),
+        title,
+        body,
+        details,
+        payload: payload,
+      );
+      
+      debugPrint('Local notification shown: $title');
+    } catch (e) {
+      debugPrint('Error showing local notification: $e');
+    }
   }
 
   /// Handle notification tap
@@ -184,7 +219,9 @@ class PushNotificationService {
           'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
         }, SetOptions(merge: true));
         
-        debugPrint('FCM token saved to Firestore');
+        debugPrint('FCM token saved to Firestore: ${token.substring(0, 20)}...');
+      } else {
+        debugPrint('FCM token is null - check Firebase configuration');
       }
     } catch (e) {
       debugPrint('Error saving FCM token: $e');
@@ -197,10 +234,10 @@ class PushNotificationService {
     if (user == null) return;
 
     try {
-      await _firestore.collection('users').doc(user.uid).update({
+      await _firestore.collection('users').doc(user.uid).set({
         'fcmToken': token,
         'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
-      });
+      }, SetOptions(merge: true));
       
       debugPrint('FCM token updated in Firestore');
     } catch (e) {

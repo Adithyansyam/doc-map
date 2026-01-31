@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'push_notification_service.dart';
 
 class NotificationService {
@@ -41,7 +42,7 @@ class NotificationService {
       });
     } catch (e) {
       // Log error but don't fail the appointment booking
-      print('Failed to create notification: $e');
+      debugPrint('Failed to create notification: $e');
     }
   }
 
@@ -201,7 +202,7 @@ class NotificationService {
         'createdAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Failed to create user notification: $e');
+      debugPrint('Failed to create user notification: $e');
     }
   }
 
@@ -339,7 +340,7 @@ class NotificationService {
         rejectionReason: rejectionReason,
       );
     } catch (e) {
-      print('Failed to create center status notification: $e');
+      debugPrint('Failed to create center status notification: $e');
     }
   }
 }

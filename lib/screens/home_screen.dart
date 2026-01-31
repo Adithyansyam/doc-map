@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'profile_screen.dart';
 import 'my_centers_screen.dart';
+import 'new_page_screen.dart';
 import '../widgets/homepage_navbar.dart';
 import '../widgets/center_drawer.dart';
 import '../services/centre_service.dart';
@@ -66,6 +67,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      );
+    } else if (index == 3) {
+      // Navigate to New Page Screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const NewPageScreen()),
       );
     } else {
       setState(() {
@@ -824,30 +831,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildRegisterContent() {
-    // This should not be called now as navigation happens in _onItemTapped
-    return Container(
-      color: Colors.white,
-      child: const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF1E88E5),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileContent() {
-    // This should not be called now as navigation happens in _onItemTapped
-    return Container(
-      color: Colors.white,
-      child: const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF1E88E5),
-        ),
-      ),
     );
   }
 

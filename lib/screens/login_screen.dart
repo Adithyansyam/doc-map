@@ -159,7 +159,7 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
                               foreground: Paint()
                                 ..style = PaintingStyle.stroke
                                 ..strokeWidth = 2.5
-                                ..color = color4.withOpacity(0.5),
+                                ..color = color4.withValues(alpha: 0.5),
                             ),
                           ),
                           // Main text with gradient-like shadow
@@ -173,12 +173,12 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
                               height: 1.2,
                               shadows: [
                                 Shadow(
-                                  color: color3.withOpacity(0.8),
+                                  color: color3.withValues(alpha: 0.8),
                                   offset: const Offset(2, 2),
                                   blurRadius: 4,
                                 ),
                                 Shadow(
-                                  color: color2.withOpacity(0.6),
+                                  color: color2.withValues(alpha: 0.6),
                                   offset: const Offset(4, 4),
                                   blurRadius: 8,
                                 ),
@@ -203,7 +203,7 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: color4.withOpacity(0.5),
+                              color: color4.withValues(alpha: 0.5),
                               blurRadius: 10,
                               spreadRadius: 2,
                             ),
@@ -358,7 +358,7 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
         duration: Duration(milliseconds: isFocused ? 400 : 300),
         curve: isFocused ? Curves.easeOutCubic : Curves.easeInOut,
         transform: Matrix4.identity()
-          ..translate(drawerOffset, 0.0, 0.0),
+          ..setTranslationRaw(drawerOffset, 0.0, 0.0),
         child: Stack(
           children: [
             // Left side panel (3D effect)
@@ -374,7 +374,7 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
                   width: 40,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: sideColor.withOpacity(0.8),
+                    color: sideColor.withValues(alpha: 0.8),
                     border: Border.all(color: sideColor, width: 0.5),
                   ),
                 ),
@@ -396,7 +396,7 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
                   width: fieldWidth,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: topColor.withOpacity(0.8),
+                    color: topColor.withValues(alpha: 0.8),
                     border: Border.all(color: topColor, width: 0.5),
                   ),
                 ),
@@ -415,7 +415,7 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
                 border: Border.all(color: sideColor, width: 0.5),
                 boxShadow: isFocused ? [
                   BoxShadow(
-                    color: sideColor.withOpacity(0.6),
+                    color: sideColor.withValues(alpha: 0.6),
                     blurRadius: 15,
                     spreadRadius: 3,
                   ),
@@ -462,7 +462,7 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           transform: Matrix4.identity()
-            ..translate(isHovered ? -20.0 : 0.0, 0.0, 0.0),
+            ..setTranslationRaw(isHovered ? -20.0 : 0.0, 0.0, 0.0),
           child: Stack(
             children: [
               // Left side panel (3D effect)
@@ -478,7 +478,7 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
                     width: 40,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: isHovered ? buttonColor.withOpacity(0.8) : sideColor.withOpacity(0.8),
+                      color: isHovered ? buttonColor.withValues(alpha: 0.8) : sideColor.withValues(alpha: 0.8),
                       border: Border.all(
                         color: isHovered ? buttonColor : sideColor,
                         width: 0.5,
@@ -501,7 +501,7 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
                     width: 250,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: isHovered ? buttonColor.withOpacity(0.8) : topColor.withOpacity(0.8),
+                      color: isHovered ? buttonColor.withValues(alpha: 0.8) : topColor.withValues(alpha: 0.8),
                       border: Border.all(
                         color: isHovered ? buttonColor : topColor,
                         width: 0.5,

@@ -43,7 +43,7 @@ class _HomePageNavBarState extends State<HomePageNavBar>
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -80,6 +80,12 @@ class _HomePageNavBarState extends State<HomePageNavBar>
                     label: 'Profile',
                     index: 2,
                     isSelected: widget.currentIndex == 2,
+                  ),
+                  _buildNavItem(
+                    icon: Icons.explore,
+                    label: 'Explore',
+                    index: 3,
+                    isSelected: widget.currentIndex == 3,
                   ),
                 ],
               ),
@@ -145,10 +151,10 @@ class AnimatedBorderPainter extends CustomPainter {
     final gradient = SweepGradient(
       colors: [
         color,
-        color.withOpacity(0.5),
+        color.withValues(alpha: 0.5),
         Colors.white,
         Colors.white,
-        color.withOpacity(0.5),
+        color.withValues(alpha: 0.5),
         color,
       ],
       stops: const [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],

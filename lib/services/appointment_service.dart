@@ -32,11 +32,11 @@ class AppointmentService {
     try {
       // Get user details
       final userDoc = await _firestore.collection('users').doc(currentUserId).get();
-      final userData = userDoc.data() as Map<String, dynamic>?;
+      final userData = userDoc.data();
 
       // Get center details to find owner ID
       final centerDoc = await _firestore.collection('centers').doc(centerId).get();
-      final centerData = centerDoc.data() as Map<String, dynamic>?;
+      final centerData = centerDoc.data();
       final centerOwnerId = centerData?['ownerId'] ?? centerData?['userId'] ?? '';
 
       final appointmentData = {

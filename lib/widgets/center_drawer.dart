@@ -345,6 +345,35 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
   Widget _buildCenterCard(BuildContext context, Map<String, dynamic> center, double? distance, int index) {
     final isSelected = _selectedIndex == index;
     
+    void navigateToAppointment() {
+      if (!mounted) return;
+      Navigator.push(
+        this.context,
+        PageRouteBuilder(
+          pageBuilder: (ctx, animation, secondaryAnimation) => 
+              AppointmentPage(center: center),
+          transitionsBuilder: (ctx, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              )),
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      ).then((_) {
+        if (!mounted) return;
+        setState(() {
+          _selectedIndex = null;
+        });
+      });
+    }
+    
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -352,32 +381,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
         });
         
         // Navigate after a brief delay for visual feedback
-        Future.delayed(const Duration(milliseconds: 150), () {
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) => 
-                  AppointmentPage(center: center),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(1.0, 0.0),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  )),
-                  child: child,
-                );
-              },
-              transitionDuration: const Duration(milliseconds: 300),
-            ),
-          ).then((_) {
-            setState(() {
-              _selectedIndex = null;
-            });
-          });
-        });
+        Future.delayed(const Duration(milliseconds: 150), navigateToAppointment);
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
