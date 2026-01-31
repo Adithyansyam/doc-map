@@ -17,10 +17,10 @@ class MyCentersScreen extends StatefulWidget {
 }
 
 class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProviderStateMixin {
-  static const Color primaryBlue = Color(0xFF90CAF9);
-  static const Color lightBlue = Color(0xFFBBDEFB);
-  static const Color darkBlue = Color(0xFF42A5F5);
-  static const Color deepBlue = Color(0xFF1565C0);
+  static const Color primaryYellow = Color(0xFFE8E45E);
+  static const Color lightYellow = Color(0xFFF8F6F0);
+  static const Color darkYellow = Color(0xFFB5A642);
+  static const Color accentYellow = Color(0xFFEAE6D8);
 
   final _centreService = CentreService();
   final _notificationService = NotificationService();
@@ -69,26 +69,26 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: lightYellow,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: lightYellow,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: primaryBlue),
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text(
           'My Centers',
           style: TextStyle(
-            color: primaryBlue,
+            color: Colors.black87,
             fontWeight: FontWeight.bold,
           ),
         ),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: deepBlue,
+          labelColor: darkYellow,
           unselectedLabelColor: Colors.grey,
-          indicatorColor: darkBlue,
+          indicatorColor: primaryYellow,
           indicatorWeight: 3,
           tabs: [
             const Tab(
@@ -173,7 +173,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                   ),
                 );
               },
-              backgroundColor: primaryBlue,
+              backgroundColor: primaryYellow,
               icon: const Icon(Icons.add, color: Colors.white),
               label: const Text(
                 'Register Center',
@@ -201,7 +201,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(
-              color: primaryBlue,
+              color: primaryYellow,
             ),
           );
         }
@@ -230,7 +230,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                       setState(() {}); // Refresh
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryBlue,
+                      backgroundColor: primaryYellow,
                     ),
                     child: const Text('Retry', style: TextStyle(color: Colors.white)),
                   ),
@@ -259,7 +259,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(
-              color: primaryBlue,
+              color: primaryYellow,
             ),
           );
         }
@@ -285,13 +285,13 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: primaryBlue.withValues(alpha: 0.1),
+                      color: primaryYellow.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.notifications_off_outlined,
                       size: 60,
-                      color: darkBlue,
+                      color: darkYellow,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -300,7 +300,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: darkBlue,
+                      color: darkYellow,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -324,7 +324,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: primaryBlue.withValues(alpha: 0.1),
+                color: primaryYellow.withValues(alpha: 0.1),
                 border: Border(
                   bottom: BorderSide(
                     color: Colors.grey.shade300,
@@ -338,7 +338,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                     '${notifications.length} notification${notifications.length != 1 ? 's' : ''}',
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: darkBlue,
+                      color: darkYellow,
                     ),
                   ),
                   Row(
@@ -350,7 +350,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                         icon: const Icon(Icons.done_all, size: 18),
                         label: const Text('Mark all read'),
                         style: TextButton.styleFrom(
-                          foregroundColor: darkBlue,
+                          foregroundColor: darkYellow,
                         ),
                       ),
                       IconButton(
@@ -437,10 +437,10 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: isRead ? Colors.white : primaryBlue.withValues(alpha: 0.05),
+            color: isRead ? Colors.white : primaryYellow.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isRead ? Colors.grey.shade300 : darkBlue.withValues(alpha: 0.3),
+              color: isRead ? Colors.grey.shade300 : darkYellow.withValues(alpha: 0.3),
               width: isRead ? 1 : 2,
             ),
             boxShadow: [
@@ -467,7 +467,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                               ? [Colors.green, Colors.green.shade700]
                               : appointmentStatus == 'rejected'
                                   ? [Colors.red, Colors.red.shade700]
-                                  : [primaryBlue, darkBlue],
+                                  : [primaryYellow, darkYellow],
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -494,7 +494,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: deepBlue,
+                                    color: accentYellow,
                                   ),
                                 ),
                               ),
@@ -523,20 +523,20 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: darkBlue.withValues(alpha: 0.1),
+                                  color: darkYellow.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.person_outline, size: 14, color: darkBlue),
+                                    Icon(Icons.person_outline, size: 14, color: darkYellow),
                                     const SizedBox(width: 4),
                                     Text(
                                       notification['userName'] ?? 'Unknown',
                                       style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
-                                        color: darkBlue,
+                                        color: darkYellow,
                                       ),
                                     ),
                                   ],
@@ -826,17 +826,17 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: primaryBlue.withValues(alpha: 0.1),
+                color: primaryYellow.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: primaryBlue.withValues(alpha: 0.3),
+                  color: primaryYellow.withValues(alpha: 0.3),
                 ),
               ),
               child: const Text(
                 'Note: You can only register one center per account',
                 style: TextStyle(
                   fontSize: 12,
-                  color: darkBlue,
+                  color: darkYellow,
                   fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.center,
@@ -905,15 +905,15 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: lightBlue.withValues(alpha: 0.2),
+              color: lightYellow.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: primaryBlue.withValues(alpha: 0.3),
+                color: primaryYellow.withValues(alpha: 0.3),
               ),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, color: primaryBlue, size: 24),
+                Icon(Icons.info_outline, color: primaryYellow, size: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -943,12 +943,12 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: primaryBlue.withValues(alpha: 0.2),
+          color: primaryYellow.withValues(alpha: 0.2),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: primaryBlue.withValues(alpha: 0.08),
+            color: primaryYellow.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -962,10 +962,10 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: primaryBlue.withValues(alpha: 0.1),
+                  color: primaryYellow.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon, color: primaryBlue, size: 24),
+                child: Icon(icon, color: primaryYellow, size: 24),
               ),
               const SizedBox(width: 12),
               Text(
@@ -973,7 +973,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: darkBlue,
+                  color: darkYellow,
                 ),
               ),
             ],
@@ -994,7 +994,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
           Icon(
             icon,
             size: 20,
-            color: primaryBlue.withValues(alpha: 0.7),
+            color: primaryYellow.withValues(alpha: 0.7),
           ),
           const SizedBox(width: 12),
           Expanded(

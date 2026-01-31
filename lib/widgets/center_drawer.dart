@@ -13,10 +13,10 @@ class CenterDrawer extends StatefulWidget {
 }
 
 class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderStateMixin {
-  static const Color primaryBlue = Color(0xFF90CAF9);
-  static const Color darkBlue = Color(0xFF42A5F5);
-  static const Color deepBlue = Color(0xFF1565C0);
-  static const Color accentBlue = Color(0xFF1E88E5);
+  static const Color primaryYellow = Color(0xFFE8E45E);
+  static const Color darkYellow = Color(0xFFB5A642);
+  static const Color accentYellow = Color(0xFFEAE6D8);
+  static const Color deepYellow = Color(0xFFC4B82A);
 
   late AnimationController _animationController;
   int? _selectedIndex;
@@ -54,11 +54,11 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
       builder: (BuildContext context, ScrollController scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xFFF8F6F0),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             boxShadow: [
               BoxShadow(
-                color: deepBlue.withValues(alpha: 0.15),
+                color: deepYellow.withValues(alpha: 0.15),
                 blurRadius: 20,
                 offset: const Offset(0, -8),
               ),
@@ -76,7 +76,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                       height: 5,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [primaryBlue, darkBlue],
+                          colors: [primaryYellow, darkYellow],
                         ),
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -107,15 +107,15 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            deepBlue.withValues(alpha: 0.1),
-                            primaryBlue.withValues(alpha: 0.1),
+                            deepYellow.withValues(alpha: 0.1),
+                            primaryYellow.withValues(alpha: 0.1),
                           ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: primaryBlue.withValues(alpha: 0.3),
+                          color: primaryYellow.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -125,14 +125,14 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [darkBlue, accentBlue],
+                                colors: [darkYellow, accentYellow],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: darkBlue.withValues(alpha: 0.3),
+                                  color: darkYellow.withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
@@ -154,7 +154,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: deepBlue,
+                                    color: deepYellow,
                                   ),
                                 ),
                                 Text(
@@ -216,11 +216,11 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                   Container(
                                     padding: const EdgeInsets.all(16),
                                     decoration: BoxDecoration(
-                                      color: primaryBlue.withValues(alpha: 0.1),
+                                      color: primaryYellow.withValues(alpha: 0.1),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const CircularProgressIndicator(
-                                      color: darkBlue,
+                                      color: darkYellow,
                                       strokeWidth: 3,
                                     ),
                                   ),
@@ -390,13 +390,13 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? darkBlue : primaryBlue.withValues(alpha: 0.3),
+            color: isSelected ? darkYellow : primaryYellow.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
               color: isSelected 
-                  ? darkBlue.withValues(alpha: 0.2) 
+                  ? darkYellow.withValues(alpha: 0.2) 
                   : Colors.grey.withValues(alpha: 0.1),
               blurRadius: isSelected ? 16 : 10,
               offset: const Offset(0, 4),
@@ -412,7 +412,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    primaryBlue.withValues(alpha: 0.15),
+                    primaryYellow.withValues(alpha: 0.15),
                     Colors.white,
                   ],
                   begin: Alignment.topLeft,
@@ -426,14 +426,14 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [primaryBlue, darkBlue],
+                        colors: [primaryYellow, darkYellow],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: darkBlue.withValues(alpha: 0.3),
+                          color: darkYellow.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -455,7 +455,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: deepBlue,
+                            color: deepYellow,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -492,8 +492,8 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      darkBlue.withValues(alpha: 0.1),
-                                      primaryBlue.withValues(alpha: 0.1),
+                                      darkYellow.withValues(alpha: 0.1),
+                                      primaryYellow.withValues(alpha: 0.1),
                                     ],
                                   ),
                                   borderRadius: BorderRadius.circular(10),
@@ -504,7 +504,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                     const Icon(
                                       Icons.near_me_rounded,
                                       size: 10,
-                                      color: deepBlue,
+                                      color: deepYellow,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -512,7 +512,7 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                                       style: const TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.bold,
-                                        color: deepBlue,
+                                        color: deepYellow,
                                       ),
                                     ),
                                   ],
@@ -528,13 +528,13 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: isSelected 
-                          ? darkBlue 
-                          : darkBlue.withValues(alpha: 0.1),
+                          ? darkYellow 
+                          : darkYellow.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.arrow_forward_ios_rounded,
-                      color: isSelected ? Colors.white : darkBlue,
+                      color: isSelected ? Colors.white : darkYellow,
                       size: 16,
                     ),
                   ),
@@ -560,19 +560,19 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                         child: _buildDetailRow(
                           Icons.phone_outlined,
                           center['contactPhone'] ?? 'N/A',
-                          darkBlue,
+                          darkYellow,
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [darkBlue, accentBlue],
+                            colors: [darkYellow, accentYellow],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: darkBlue.withValues(alpha: 0.3),
+                              color: darkYellow.withValues(alpha: 0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -611,13 +611,13 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: primaryBlue.withValues(alpha: 0.1),
+            color: primaryYellow.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
             size: 14,
-            color: darkBlue,
+            color: darkYellow,
           ),
         ),
         const SizedBox(width: 10),
