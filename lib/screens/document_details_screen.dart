@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/document_service.dart';
 
 class DocumentDetailsScreen extends StatefulWidget {
   const DocumentDetailsScreen({super.key});
@@ -14,6 +15,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
   
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final DocumentService _documentService = DocumentService();
   bool _isLoading = false;
 
   @override
@@ -48,20 +50,36 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
 
     setState(() => _isLoading = true);
 
-    // TODO: Add your save logic here
-    await Future.delayed(const Duration(seconds: 1)); // Simulating save
-
-    setState(() => _isLoading = false);
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Document details saved successfully!'),
-          backgroundColor: Colors.green.shade400,
-          behavior: SnackBarBehavior.floating,
-        ),
+    try {
+      await _documentService.addDocument(
+        title: _titleController.text.trim(),
+        description: _descriptionController.text.trim(),
       );
-      Navigator.pop(context);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Document details saved successfully!'),
+            backgroundColor: Colors.green.shade400,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving document: $e'),
+            backgroundColor: Colors.red.shade400,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

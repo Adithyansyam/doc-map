@@ -73,6 +73,24 @@ service cloud.firestore {
                                 resource.data.userId == request.auth.uid);
     }
     
+    // Documents collection - all authenticated users can read, creators can manage their own
+    match /documents/{documentId} {
+      // All authenticated users can read documents (visible to everyone)
+      allow read: if request.auth != null;
+      
+      // Authenticated users can create documents
+      allow create: if request.auth != null && 
+                       request.resource.data.createdBy == request.auth.uid;
+      
+      // Only the creator can update their own documents
+      allow update: if request.auth != null && 
+                       resource.data.createdBy == request.auth.uid;
+      
+      // Only the creator can delete their own documents
+      allow delete: if request.auth != null && 
+                       resource.data.createdBy == request.auth.uid;
+    }
+    
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;
