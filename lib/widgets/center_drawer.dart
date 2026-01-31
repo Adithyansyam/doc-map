@@ -524,20 +524,6 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                       ],
                     ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: isSelected 
-                          ? darkYellow 
-                          : darkYellow.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      color: isSelected ? Colors.white : darkYellow,
-                      size: 16,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -554,47 +540,10 @@ class _CenterDrawerState extends State<CenterDrawer> with SingleTickerProviderSt
                     Colors.grey[700]!,
                   ),
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildDetailRow(
-                          Icons.phone_outlined,
-                          center['contactPhone'] ?? 'N/A',
-                          Colors.black87,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [darkYellow, accentYellow],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: darkYellow.withValues(alpha: 0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.calendar_month, size: 14, color: Colors.white),
-                            SizedBox(width: 6),
-                            Text(
-                              'Book Now',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  _buildDetailRow(
+                    Icons.phone_outlined,
+                    center['contactPhone'] ?? 'N/A',
+                    Colors.black87,
                   ),
                 ],
               ),
