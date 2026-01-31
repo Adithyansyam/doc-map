@@ -6,7 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'profile_screen.dart';
 import 'my_centers_screen.dart';
-import 'new_page_screen.dart';
+import 'search_doc.dart';
 import '../widgets/homepage_navbar.dart';
 import '../widgets/center_drawer.dart';
 import '../services/centre_service.dart';
@@ -69,10 +69,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         MaterialPageRoute(builder: (context) => const ProfileScreen()),
       );
     } else if (index == 3) {
-      // Navigate to New Page Screen
+      // Navigate to Search Screen
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const NewPageScreen()),
+        MaterialPageRoute(builder: (context) => const SearchDoc()),
       );
     } else {
       setState(() {

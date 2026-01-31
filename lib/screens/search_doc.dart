@@ -1,19 +1,51 @@
 import 'package:flutter/material.dart';
+import '../widgets/homepage_navbar.dart';
+import 'home_screen.dart';
+import 'my_centers_screen.dart';
+import 'profile_screen.dart';
 
-class NewPageScreen extends StatefulWidget {
-  const NewPageScreen({super.key});
+class SearchDoc extends StatefulWidget {
+  const SearchDoc({super.key});
 
   @override
-  State<NewPageScreen> createState() => _NewPageScreenState();
+  State<SearchDoc> createState() => _SearchDocState();
 }
 
-class _NewPageScreenState extends State<NewPageScreen> {
+class _SearchDocState extends State<SearchDoc> {
+  int _currentIndex = 3; // Set to 3 since this is the Search page
+
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      // Navigate to Home Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else if (index == 1) {
+      // Navigate to My Centers Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MyCentersScreen()),
+      );
+    } else if (index == 2) {
+      // Navigate to Profile Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      );
+    } else {
+      setState(() {
+        _currentIndex = index;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'New Page',
+          'Search',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -39,13 +71,13 @@ class _NewPageScreenState extends State<NewPageScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.explore,
+                Icons.search,
                 size: 80,
                 color: const Color(0xFF1E88E5),
               ),
               const SizedBox(height: 20),
               const Text(
-                'Welcome to New Page',
+                'Search Documents',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -56,7 +88,7 @@ class _NewPageScreenState extends State<NewPageScreen> {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 40),
                 child: Text(
-                  'This is your new page. Add your content here.',
+                  'Search for documents and information here.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -67,6 +99,10 @@ class _NewPageScreenState extends State<NewPageScreen> {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: HomePageNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
       ),
     );
   }

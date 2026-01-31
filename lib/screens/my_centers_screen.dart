@@ -4,6 +4,10 @@ import 'package:akshaya_hub/services/centre_service.dart';
 import 'package:akshaya_hub/screens/register_akshaya_screen.dart';
 import 'package:akshaya_hub/services/notification_service.dart';
 import 'package:akshaya_hub/services/appointment_service.dart';
+import '../widgets/homepage_navbar.dart';
+import 'home_screen.dart';
+import 'profile_screen.dart';
+import 'search_doc.dart';
 
 class MyCentersScreen extends StatefulWidget {
   const MyCentersScreen({super.key});
@@ -22,6 +26,33 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
   final _notificationService = NotificationService();
   final _appointmentService = AppointmentService();
   late TabController _tabController;
+  int _currentIndex = 1; // Set to 1 since this is the My Centers page
+
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      // Navigate to Home Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else if (index == 2) {
+      // Navigate to Profile Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const ProfileScreen()),
+      );
+    } else if (index == 3) {
+      // Navigate to Search Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const SearchDoc()),
+      );
+    } else {
+      setState(() {
+        _currentIndex = index;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -155,6 +186,10 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
           }
           return const SizedBox.shrink(); // Hide button when center exists
         },
+      ),
+      bottomNavigationBar: HomePageNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
       ),
     );
   }
