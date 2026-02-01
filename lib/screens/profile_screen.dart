@@ -159,20 +159,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   
                   // Menu Items
                   _buildMenuItem(
-                    icon: Icons.edit_outlined,
-                    iconColor: const Color(0xFF1E88E5),
-                    title: 'Edit Profile',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const EditProfileScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  
-                  _buildMenuItem(
                     icon: Icons.settings_outlined,
                     iconColor: const Color(0xFF1E88E5),
                     title: 'Settings',
@@ -220,18 +206,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-                  ),
-                  
-                  _buildMenuItem(
-                    icon: Icons.lock_outline,
-                    iconColor: const Color(0xFF1E88E5),
-                    title: 'Privacy & Security',
-                    onTap: () {
-                      // TODO: Navigate to privacy screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Privacy & Security - Coming Soon')),
-                      );
-                    },
                   ),
                   
                   const SizedBox(height: 16),
