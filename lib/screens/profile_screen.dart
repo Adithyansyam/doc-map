@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
 import '../widgets/homepage_navbar.dart';
 import 'edit_profile.dart';
+import 'settings_screen.dart';
 import 'user_notifications_screen.dart';
 import '../services/notification_service.dart';
 
@@ -176,9 +177,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     iconColor: const Color(0xFF1E88E5),
                     title: 'Settings',
                     onTap: () {
-                      // TODO: Navigate to settings screen
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Settings - Coming Soon')),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsScreen(),
+                        ),
                       );
                     },
                   ),
