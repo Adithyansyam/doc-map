@@ -12,6 +12,7 @@ class DocumentService {
   Future<void> addDocument({
     required String title,
     required String description,
+    String? processingTime,
   }) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('User not authenticated');
@@ -19,6 +20,7 @@ class DocumentService {
     await _documentsCollection.add({
       'title': title,
       'description': description,
+      'processingTime': processingTime,
       'createdBy': user.uid,
       'createdByEmail': user.email,
       'createdAt': FieldValue.serverTimestamp(),

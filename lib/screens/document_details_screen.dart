@@ -15,6 +15,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
   
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _processingTimeController = TextEditingController();
   final DocumentService _documentService = DocumentService();
   bool _isLoading = false;
 
@@ -22,6 +23,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _processingTimeController.dispose();
     super.dispose();
   }
 
@@ -54,6 +56,9 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
       await _documentService.addDocument(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
+        processingTime: _processingTimeController.text.trim().isNotEmpty 
+            ? _processingTimeController.text.trim() 
+            : null,
       );
 
       if (mounted) {
@@ -138,6 +143,36 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
                     controller: _titleController,
                     decoration: InputDecoration(
                       hintText: 'Enter document title',
+                      hintStyle: TextStyle(color: Colors.grey[400]),
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Processing Time Section
+                  Text(
+                    'Processing Time',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _processingTimeController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter processing time (e.g., 2-3 days)',
                       hintStyle: TextStyle(color: Colors.grey[400]),
                       filled: true,
                       fillColor: Colors.grey[100],
