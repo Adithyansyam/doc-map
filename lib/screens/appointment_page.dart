@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/appointment_service.dart';
+import 'center_details_screen.dart';
 
 class AppointmentPage extends StatefulWidget {
   final Map<String, dynamic> center;
@@ -380,88 +381,111 @@ class _AppointmentPageState extends State<AppointmentPage> {
   }
 
   Widget _buildCenterProfileCard() {
-    return Row(
-      children: [
-        // Profile Image
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(20),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CenterDetailsScreen(center: widget.center),
           ),
-          child: Stack(
-            children: [
-              Center(
-                child: Icon(Icons.business, size: 40, color: Colors.grey[600]),
-              ),
-              Positioned(
-                bottom: 4,
-                right: 4,
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                ),
-              ),
-            ],
-          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.shade200),
         ),
-        const SizedBox(width: 16),
-        // Center Info
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.center['centreName'] ?? 'Akshaya Center',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
+        child: Row(
+          children: [
+            // Profile Image
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(20),
               ),
-              const SizedBox(height: 4),
-              Text(
-                'GOVERNMENT CENTER',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[600],
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Row(
+              child: Stack(
                 children: [
-                  const Icon(Icons.star, color: primaryYellow, size: 16),
-                  const SizedBox(width: 4),
-                  const Text(
-                    '4.9',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                  Center(
+                    child: Icon(Icons.business, size: 40, color: Colors.grey[600]),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '(120 reviews)',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
+                  Positioned(
+                    bottom: 4,
+                    right: 4,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
                     ),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 16),
+            // Center Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.center['centreName'] ?? 'Akshaya Center',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'GOVERNMENT CENTER',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[600],
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: primaryYellow, size: 16),
+                      const SizedBox(width: 4),
+                      const Text(
+                        '4.9',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '(120 reviews)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: Colors.grey[400],
+              size: 24,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
