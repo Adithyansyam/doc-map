@@ -16,6 +16,14 @@ class CenterDetailsScreen extends StatelessWidget {
   }
 
   Future<void> _launchGoogleMaps(double latitude, double longitude) async {
+    // Try geo: URI first (opens in maps app directly)
+    final Uri geoUri = Uri.parse('geo:$latitude,$longitude?q=$latitude,$longitude');
+    if (await canLaunchUrl(geoUri)) {
+      await launchUrl(geoUri);
+      return;
+    }
+    
+    // Fallback to Google Maps URL
     final Uri googleMapsUri = Uri.parse(
       'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
     );
