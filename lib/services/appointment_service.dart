@@ -46,6 +46,9 @@ class AppointmentService {
       final centerData = centerDoc.data();
       final centerOwnerId = centerData?['ownerId'] ?? centerData?['userId'] ?? '';
 
+      // Generate sequential appointment number using a Firestore counter
+      final int appointmentNumber = await _getNextAppointmentNumber();
+
       final appointmentData = {
         'userId': currentUserId,
         'userName': userData?['name'] ?? 'Unknown User',
@@ -59,6 +62,7 @@ class AppointmentService {
         'appointmentTime': appointmentTime,
         'purpose': purpose,
         'notes': notes ?? '',
+        'appointmentNumber': appointmentNumber,
         'status': 'pending', // pending, confirmed, completed, cancelled
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
@@ -83,6 +87,38 @@ class AppointmentService {
       return docRef.id;
     } catch (e) {
       throw Exception('Failed to book appointment: $e');
+    }
+  }
+
+  /// Atomically increments and returns the next sequential appointment number.
+  Future<int> _getNextAppointmentNumber() async {
+    final counterRef = _firestore.collection('counters').doc('appointments');
+    return _firestore.runTransaction<int>((transaction) async {
+      final snapshot = await transaction.get(counterRef);
+      int nextNumber;
+      if (!snapshot.exists) {
+        nextNumber = 1;
+        transaction.set(counterRef, {'current': 1});
+      } else {
+        final current = (snapshot.data()?['current'] ?? 0) as int;
+        nextNumber = current + 1;
+        transaction.update(counterRef, {'current': nextNumber});
+      }
+      return nextNumber;
+    });
+  }
+
+  /// Returns the sequential appointment number for an existing appointment.
+  Future<int?> getAppointmentNumber(String appointmentId) async {
+    try {
+      final doc = await _appointmentsCollection.doc(appointmentId).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        return data['appointmentNumber'] as int?;
+      }
+      return null;
+    } catch (_) {
+      return null;
     }
   }
 
@@ -307,15 +343,12 @@ class AppointmentService {
     }
   }
 
-  /// Generates a professional PDF document with full center and appointment
-  /// details. The [appointment] map should contain center fields (centerName,
-  /// registrationNumber, address, city, state, pinCode, contactPerson,
-  /// centerPhone, contactEmail, latitude, longitude) as well as appointment
-  /// fields (appointmentDate, appointmentTime, purpose, notes).
+  /// Generates a modern, professionally styled PDF with appointment number
+  /// and full center / user / appointment details.
   Future<Uint8List> createAppointmentPdf(Map<String, dynamic> appointment) async {
     final pdf = pw.Document();
 
-    // --- resolve date ---
+    // ── resolve date ────────────────────────────────────────────────────
     DateTime appointmentDate;
     final rawDate = appointment['appointmentDate'];
     if (rawDate is Timestamp) {
@@ -332,108 +365,233 @@ class AppointmentService {
       return '${days[d.weekday - 1]}, ${months[d.month - 1]} ${d.day}, ${d.year}';
     }
 
-    // --- helpers ---
-    final headerStyle = pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold);
-    final sectionStyle = pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey800);
-    final labelStyle = pw.TextStyle(fontSize: 11, color: PdfColors.grey700);
-    final valueStyle = pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold);
+    String fmtShortDate(DateTime d) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return '${d.day} ${months[d.month - 1]} ${d.year}';
+    }
 
+    // ── colours ─────────────────────────────────────────────────────────
+    const accent      = PdfColors.amber;
+    const accentDark  = PdfColors.amber800;
+    const darkBg      = PdfColor.fromInt(0xFF1E293B); // slate-800
+    const lightBg     = PdfColor.fromInt(0xFFF8FAFC); // slate-50
+    const cardBorder  = PdfColor.fromInt(0xFFE2E8F0); // slate-200
+    const textPrimary = PdfColor.fromInt(0xFF0F172A); // slate-900
+    const textSecondary = PdfColor.fromInt(0xFF64748B); // slate-500
+
+    // ── text styles ─────────────────────────────────────────────────────
+    final titleStyle = pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold, color: PdfColors.white);
+    final subtitleStyle = pw.TextStyle(fontSize: 10, color: PdfColors.grey300);
+    final sectionStyle = pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold, color: accentDark, letterSpacing: 0.5);
+    final labelStyle = pw.TextStyle(fontSize: 9.5, color: textSecondary);
+    final valueStyle = pw.TextStyle(fontSize: 10.5, fontWeight: pw.FontWeight.bold, color: textPrimary);
+
+    // ── appointment number ──────────────────────────────────────────────
+    final rawNumber = appointment['appointmentNumber'];
+    final int seqNumber = (rawNumber is int) ? rawNumber : 0;
+    final appointmentNumber = seqNumber > 0 ? '#$seqNumber' : '#--';
+
+    // ── address ─────────────────────────────────────────────────────────
+    final addrParts = [
+      appointment['address'] ?? '',
+      appointment['city'] ?? '',
+      appointment['state'] ?? '',
+      appointment['pinCode'] ?? '',
+    ].where((s) => (s as String).trim().isNotEmpty).toList();
+    final fullAddress = addrParts.join(', ');
+
+    final lat = appointment['latitude'];
+    final lng = appointment['longitude'];
+    final locationStr = (lat != null && lng != null) ? '$lat, $lng' : '';
+
+    // ── helpers ─────────────────────────────────────────────────────────
     pw.Widget infoRow(String label, String value) {
       if (value.trim().isEmpty) return pw.SizedBox();
       return pw.Padding(
-        padding: const pw.EdgeInsets.symmetric(vertical: 2),
+        padding: const pw.EdgeInsets.symmetric(vertical: 3),
         child: pw.Row(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.SizedBox(
-              width: 140,
-              child: pw.Text(label, style: labelStyle),
-            ),
+            pw.SizedBox(width: 120, child: pw.Text(label, style: labelStyle)),
             pw.Expanded(child: pw.Text(value, style: valueStyle)),
           ],
         ),
       );
     }
 
-    pw.Widget sectionTitle(String title) {
-      return pw.Padding(
-        padding: const pw.EdgeInsets.only(top: 18, bottom: 6),
+    pw.Widget card({required String title, required List<pw.Widget> children}) {
+      return pw.Container(
+        margin: const pw.EdgeInsets.only(bottom: 14),
+        padding: const pw.EdgeInsets.all(16),
+        decoration: pw.BoxDecoration(
+          color: PdfColors.white,
+          border: pw.Border.all(color: cardBorder, width: 0.8),
+          borderRadius: pw.BorderRadius.circular(8),
+        ),
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Text(title, style: sectionStyle),
-            pw.Divider(thickness: 0.5),
+            pw.Row(children: [
+              pw.Container(width: 4, height: 14, color: accent),
+              pw.SizedBox(width: 8),
+              pw.Text(title, style: sectionStyle),
+            ]),
+            pw.SizedBox(height: 10),
+            ...children,
           ],
         ),
       );
     }
 
-    // --- build full address string ---
-    final parts = [
-      appointment['address'] ?? '',
-      appointment['city'] ?? '',
-      appointment['state'] ?? '',
-      appointment['pinCode'] ?? '',
-    ].where((s) => (s as String).trim().isNotEmpty).toList();
-    final fullAddress = parts.join(', ');
+    pw.Widget statBox(String label, String value) {
+      return pw.Expanded(
+        child: pw.Container(
+          padding: const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          decoration: pw.BoxDecoration(
+            color: lightBg,
+            borderRadius: pw.BorderRadius.circular(6),
+            border: pw.Border.all(color: cardBorder, width: 0.5),
+          ),
+          child: pw.Column(
+            children: [
+              pw.Text(value, style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: textPrimary)),
+              pw.SizedBox(height: 4),
+              pw.Text(label, style: pw.TextStyle(fontSize: 8.5, color: textSecondary)),
+            ],
+          ),
+        ),
+      );
+    }
 
-    // --- latitude / longitude ---
-    final lat = appointment['latitude'];
-    final lng = appointment['longitude'];
-    final locationStr = (lat != null && lng != null) ? '$lat, $lng' : '';
-
+    // ── build page ──────────────────────────────────────────────────────
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(40),
+        margin: const pw.EdgeInsets.all(0),
         build: (pw.Context ctx) {
           return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // Title
-              pw.Center(
-                child: pw.Text('Appointment Confirmation', style: headerStyle),
-              ),
-              pw.SizedBox(height: 6),
-              pw.Center(
-                child: pw.Text(
-                  'Booked on ${fmtDate(DateTime.now())}',
-                  style: pw.TextStyle(fontSize: 10, color: PdfColors.grey),
+              // ══════════ HEADER ══════════
+              pw.Container(
+                width: double.infinity,
+                padding: const pw.EdgeInsets.symmetric(horizontal: 36, vertical: 28),
+                color: darkBg,
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Text('AKSHAYA HUB', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: accent, letterSpacing: 2)),
+                            pw.SizedBox(height: 4),
+                            pw.Text('Appointment Confirmation', style: titleStyle),
+                          ],
+                        ),
+                        // Appointment number badge
+                        pw.Container(
+                          padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          decoration: pw.BoxDecoration(
+                            color: accent,
+                            borderRadius: pw.BorderRadius.circular(6),
+                          ),
+                          child: pw.Column(
+                            children: [
+                              pw.Text('APPOINTMENT NO.', style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold, color: PdfColors.black, letterSpacing: 1)),
+                              pw.SizedBox(height: 2),
+                              pw.Text(appointmentNumber, style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.black)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 10),
+                    pw.Text('Booked on ${fmtDate(DateTime.now())}', style: subtitleStyle),
+                  ],
                 ),
               ),
-              pw.SizedBox(height: 8),
-              pw.Divider(thickness: 1),
 
-              // ---- Center Details ----
-              sectionTitle('Center Details'),
-              infoRow('Center Name', appointment['centerName'] ?? ''),
-              infoRow('Registration No.', appointment['registrationNumber'] ?? ''),
-              infoRow('Contact Person', appointment['contactPerson'] ?? ''),
-              infoRow('Phone', appointment['centerPhone'] ?? ''),
-              infoRow('Email', appointment['contactEmail'] ?? ''),
-              infoRow('Address', fullAddress),
-              infoRow('Coordinates', locationStr),
+              // ══════════ QUICK STATS BAR ══════════
+              pw.Container(
+                width: double.infinity,
+                padding: const pw.EdgeInsets.symmetric(horizontal: 36, vertical: 14),
+                color: lightBg,
+                child: pw.Row(
+                  children: [
+                    statBox('DATE', fmtShortDate(appointmentDate)),
+                    pw.SizedBox(width: 10),
+                    statBox('TIME', appointment['appointmentTime'] ?? ''),
+                    pw.SizedBox(width: 10),
+                    statBox('STATUS', 'CONFIRMED'),
+                  ],
+                ),
+              ),
 
-              // ---- User Details ----
-              sectionTitle('User Details'),
-              infoRow('Name', appointment['userName'] ?? ''),
-              infoRow('Email', appointment['userEmail'] ?? ''),
-              infoRow('Phone', appointment['userPhone'] ?? ''),
+              // ══════════ BODY ══════════
+              pw.Expanded(
+                child: pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 36, vertical: 20),
+                  child: pw.Column(
+                    children: [
+                      // Center Details card
+                      card(title: 'CENTER DETAILS', children: [
+                        infoRow('Center Name', appointment['centerName'] ?? ''),
+                        infoRow('Reg. Number', appointment['registrationNumber'] ?? ''),
+                        infoRow('Contact Person', appointment['contactPerson'] ?? ''),
+                        infoRow('Phone', appointment['centerPhone'] ?? ''),
+                        infoRow('Email', appointment['contactEmail'] ?? ''),
+                        infoRow('Address', fullAddress),
+                        infoRow('Coordinates', locationStr),
+                      ]),
 
-              // ---- Appointment Details ----
-              sectionTitle('Appointment Details'),
-              infoRow('Date', fmtDate(appointmentDate)),
-              infoRow('Time', appointment['appointmentTime'] ?? ''),
-              infoRow('Purpose', appointment['purpose'] ?? ''),
-              infoRow('Notes', appointment['notes'] ?? ''),
+                      // Two-column row: User + Appointment
+                      pw.Row(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Expanded(
+                            child: card(title: 'USER DETAILS', children: [
+                              infoRow('Name', appointment['userName'] ?? ''),
+                              infoRow('Email', appointment['userEmail'] ?? ''),
+                              infoRow('Phone', appointment['userPhone'] ?? ''),
+                            ]),
+                          ),
+                          pw.SizedBox(width: 12),
+                          pw.Expanded(
+                            child: card(title: 'VISIT DETAILS', children: [
+                              infoRow('Purpose', appointment['purpose'] ?? ''),
+                              infoRow('Notes', appointment['notes'] ?? ''),
+                            ]),
+                          ),
+                        ],
+                      ),
 
-              pw.SizedBox(height: 30),
-              pw.Divider(thickness: 0.5),
-              pw.SizedBox(height: 8),
-              pw.Center(
-                child: pw.Text(
-                  'Thank you for booking with Akshaya Hub',
-                  style: pw.TextStyle(fontSize: 11, fontStyle: pw.FontStyle.italic, color: PdfColors.grey700),
+                      pw.Spacer(),
+
+                      // ══════════ FOOTER ══════════
+                      pw.Container(
+                        width: double.infinity,
+                        padding: const pw.EdgeInsets.symmetric(vertical: 14),
+                        decoration: const pw.BoxDecoration(
+                          border: pw.Border(top: pw.BorderSide(color: cardBorder, width: 0.5)),
+                        ),
+                        child: pw.Column(
+                          children: [
+                            pw.Text(
+                              'Thank you for booking with Akshaya Hub',
+                              style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: accentDark),
+                            ),
+                            pw.SizedBox(height: 4),
+                            pw.Text(
+                              'Please arrive 10 minutes before your scheduled time  |  Appointment No: $appointmentNumber',
+                              style: pw.TextStyle(fontSize: 8, color: textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

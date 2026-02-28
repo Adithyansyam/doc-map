@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-
-// PDF generation and printing packages
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../services/appointment_service.dart';
@@ -32,6 +28,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
   bool _isLoadingSlots = false;
   Map<String, int> _timeSlotCounts = {};
   static const int maxBookingsPerSlot = 20;
+  String? _lastBookedAppointmentId;
+  int? _lastBookedAppointmentNumber;
 
   final List<String> _timeSlots = [
     '09:00 AM',
@@ -150,7 +148,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
         return;
       }
 
-      await _appointmentService.bookAppointment(
+      final appointmentId = await _appointmentService.bookAppointment(
         centerId: widget.center['id'] ?? '',
         centerName: widget.center['centreName'] ?? 'Unknown Center',
         centerAddress:
@@ -161,6 +159,12 @@ class _AppointmentPageState extends State<AppointmentPage> {
         purpose: _purposeController.text.trim(),
         notes: _notesController.text.trim(),
       );
+
+      _lastBookedAppointmentId = appointmentId;
+
+      // Fetch the sequential appointment number
+      _lastBookedAppointmentNumber =
+          await _appointmentService.getAppointmentNumber(appointmentId);
 
       // Auto-download PDF immediately after successful booking
       if (mounted) {
@@ -362,6 +366,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
     } catch (_) {}
 
     final appointmentData = {
+      // Sequential appointment number
+      'appointmentNumber': _lastBookedAppointmentNumber ?? 0,
       // Full center details
       'centerName': center['centreName'] ?? '',
       'registrationNumber': center['registrationNumber'] ?? '',
