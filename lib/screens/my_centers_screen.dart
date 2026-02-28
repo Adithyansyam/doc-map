@@ -153,35 +153,6 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
           _buildNotificationsTab(),
         ],
       ),
-      // Only show FAB when no center is registered
-      floatingActionButton: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: _centreService.getUserCentresStream(),
-        builder: (context, snapshot) {
-          final centers = snapshot.data ?? [];
-          if (centers.isEmpty) {
-            return FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RegisterAkshayaScreen(),
-                  ),
-                );
-              },
-              backgroundColor: primaryYellow,
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: const Text(
-                'Register Center',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            );
-          }
-          return const SizedBox.shrink(); // Hide button when center exists
-        },
-      ),
       bottomNavigationBar: HomePageNavBar(
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
