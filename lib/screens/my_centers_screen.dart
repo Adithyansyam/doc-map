@@ -845,10 +845,44 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
 
   Widget _buildCenterDetailsView(Map<String, dynamic> center) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Dashboard header
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  center['centreName'] ?? '',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  center['address'] ?? '',
+                  style: const TextStyle(fontSize: 14, color: Colors.black54),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
           
           // Center Information Card
           _buildFullDetailSection(
@@ -977,14 +1011,14 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: primaryYellow.withValues(alpha: 0.2),
-          width: 1.5,
+          color: Colors.grey.shade300,
+          width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: primaryYellow.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -1007,7 +1041,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: darkYellow,
+                  color: Colors.black87,
                 ),
               ),
             ],
@@ -1028,7 +1062,7 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
           Icon(
             icon,
             size: 20,
-            color: primaryYellow.withValues(alpha: 0.7),
+            color: Colors.black54,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1037,9 +1071,9 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
               children: [
                 Text(
                   label,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: Colors.black54,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
