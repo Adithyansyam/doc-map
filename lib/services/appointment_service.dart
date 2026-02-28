@@ -296,12 +296,15 @@ class AppointmentService {
     }
   }
 
-  /// Generates a PDF document for the given appointment data and returns the
-  /// bytes. The appointment map is expected to contain the same fields used
-  /// when booking (centerName, centerAddress, appointmentDate, etc.).
+  /// Generates a professional PDF document with full center and appointment
+  /// details. The [appointment] map should contain center fields (centerName,
+  /// registrationNumber, address, city, state, pinCode, contactPerson,
+  /// centerPhone, contactEmail, latitude, longitude) as well as appointment
+  /// fields (appointmentDate, appointmentTime, purpose, notes).
   Future<Uint8List> createAppointmentPdf(Map<String, dynamic> appointment) async {
     final pdf = pw.Document();
 
+    // --- resolve date ---
     DateTime appointmentDate;
     final rawDate = appointment['appointmentDate'];
     if (rawDate is Timestamp) {
@@ -312,43 +315,111 @@ class AppointmentService {
       appointmentDate = DateTime.now();
     }
 
-    String formatDate(DateTime date) {
-      const months = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-      ];
-      const days = [
-        'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-        'Friday', 'Saturday', 'Sunday',
-      ];
-      return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}, ${date.year}';
+    String fmtDate(DateTime d) {
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      return '${days[d.weekday - 1]}, ${months[d.month - 1]} ${d.day}, ${d.year}';
     }
+
+    // --- helpers ---
+    final headerStyle = pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold);
+    final sectionStyle = pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold, color: PdfColors.blueGrey800);
+    final labelStyle = pw.TextStyle(fontSize: 11, color: PdfColors.grey700);
+    final valueStyle = pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold);
+
+    pw.Widget infoRow(String label, String value) {
+      if (value.trim().isEmpty) return pw.SizedBox();
+      return pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(vertical: 2),
+        child: pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.SizedBox(
+              width: 140,
+              child: pw.Text(label, style: labelStyle),
+            ),
+            pw.Expanded(child: pw.Text(value, style: valueStyle)),
+          ],
+        ),
+      );
+    }
+
+    pw.Widget sectionTitle(String title) {
+      return pw.Padding(
+        padding: const pw.EdgeInsets.only(top: 18, bottom: 6),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(title, style: sectionStyle),
+            pw.Divider(thickness: 0.5),
+          ],
+        ),
+      );
+    }
+
+    // --- build full address string ---
+    final parts = [
+      appointment['address'] ?? '',
+      appointment['city'] ?? '',
+      appointment['state'] ?? '',
+      appointment['pinCode'] ?? '',
+    ].where((s) => (s as String).trim().isNotEmpty).toList();
+    final fullAddress = parts.join(', ');
+
+    // --- latitude / longitude ---
+    final lat = appointment['latitude'];
+    final lng = appointment['longitude'];
+    final locationStr = (lat != null && lng != null) ? '$lat, $lng' : '';
 
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
-        build: (pw.Context context) {
-          return pw.Padding(
-            padding: const pw.EdgeInsets.all(24),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text('Appointment Confirmation',
-                    style: pw.TextStyle(
-                        fontSize: 24, fontWeight: pw.FontWeight.bold)),
-                pw.SizedBox(height: 16),
-                pw.Text('Center: ${appointment['centerName'] ?? ''}'),
-                pw.Text('Address: ${appointment['centerAddress'] ?? ''}'),
-                pw.Text('Phone: ${appointment['centerPhone'] ?? ''}'),
-                pw.SizedBox(height: 12),
-                pw.Text('Appointment Date: ${formatDate(appointmentDate)}'),
-                pw.Text('Appointment Time: ${appointment['appointmentTime'] ?? ''}'),
-                pw.SizedBox(height: 12),
-                pw.Text('Purpose: ${appointment['purpose'] ?? ''}'),
-                if ((appointment['notes'] as String?)?.trim().isNotEmpty ?? false)
-                  pw.Text('Notes: ${appointment['notes']}'),
-              ],
-            ),
+        margin: const pw.EdgeInsets.all(40),
+        build: (pw.Context ctx) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Title
+              pw.Center(
+                child: pw.Text('Appointment Confirmation', style: headerStyle),
+              ),
+              pw.SizedBox(height: 6),
+              pw.Center(
+                child: pw.Text(
+                  'Booked on ${fmtDate(DateTime.now())}',
+                  style: pw.TextStyle(fontSize: 10, color: PdfColors.grey),
+                ),
+              ),
+              pw.SizedBox(height: 8),
+              pw.Divider(thickness: 1),
+
+              // ---- Center Details ----
+              sectionTitle('Center Details'),
+              infoRow('Center Name', appointment['centerName'] ?? ''),
+              infoRow('Registration No.', appointment['registrationNumber'] ?? ''),
+              infoRow('Contact Person', appointment['contactPerson'] ?? ''),
+              infoRow('Phone', appointment['centerPhone'] ?? ''),
+              infoRow('Email', appointment['contactEmail'] ?? ''),
+              infoRow('Address', fullAddress),
+              infoRow('Coordinates', locationStr),
+
+              // ---- Appointment Details ----
+              sectionTitle('Appointment Details'),
+              infoRow('Date', fmtDate(appointmentDate)),
+              infoRow('Time', appointment['appointmentTime'] ?? ''),
+              infoRow('Purpose', appointment['purpose'] ?? ''),
+              infoRow('Notes', appointment['notes'] ?? ''),
+
+              pw.SizedBox(height: 30),
+              pw.Divider(thickness: 0.5),
+              pw.SizedBox(height: 8),
+              pw.Center(
+                child: pw.Text(
+                  'Thank you for booking with Akshaya Hub',
+                  style: pw.TextStyle(fontSize: 11, fontStyle: pw.FontStyle.italic, color: PdfColors.grey700),
+                ),
+              ),
+            ],
           );
         },
       ),

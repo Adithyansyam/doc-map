@@ -162,6 +162,11 @@ class _AppointmentPageState extends State<AppointmentPage> {
         notes: _notesController.text.trim(),
       );
 
+      // Auto-download PDF immediately after successful booking
+      if (mounted) {
+        await _downloadAppointmentPdf();
+      }
+
       if (mounted) {
         _showSuccessDialog();
       }
@@ -344,14 +349,21 @@ class _AppointmentPageState extends State<AppointmentPage> {
   Future<void> _downloadAppointmentPdf() async {
     if (_selectedDate == null || _selectedTimeSlot == null) return;
 
-    // build a simple map containing the data we just booked so the service
-    // can create the document consistently with other parts of the app if
-    // we ever need to reuse it.
+    final center = widget.center;
     final appointmentData = {
-      'centerName': widget.center['centreName'] ?? '',
-      'centerAddress':
-          '${widget.center['address'] ?? ''}, ${widget.center['city'] ?? ''}, ${widget.center['state'] ?? ''}',
-      'centerPhone': widget.center['contactPhone'] ?? '',
+      // Full center details
+      'centerName': center['centreName'] ?? '',
+      'registrationNumber': center['registrationNumber'] ?? '',
+      'address': center['address'] ?? '',
+      'city': center['city'] ?? '',
+      'state': center['state'] ?? '',
+      'pinCode': center['pinCode'] ?? '',
+      'contactPerson': center['contactPerson'] ?? '',
+      'centerPhone': center['contactPhone'] ?? '',
+      'contactEmail': center['contactEmail'] ?? '',
+      'latitude': center['latitude'],
+      'longitude': center['longitude'],
+      // Appointment details
       'appointmentDate': _selectedDate!,
       'appointmentTime': _selectedTimeSlot!,
       'purpose': _purposeController.text.trim(),
@@ -362,7 +374,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
       final bytes = await _appointmentService.createAppointmentPdf(appointmentData);
       await Printing.layoutPdf(onLayout: (format) async => bytes);
     } catch (e) {
-      _showErrorSnackBar('Failed to generate PDF: $e');
+      if (mounted) _showErrorSnackBar('Failed to generate PDF: $e');
     }
   }
 
