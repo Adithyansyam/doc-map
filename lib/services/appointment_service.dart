@@ -296,6 +296,17 @@ class AppointmentService {
     }
   }
 
+  // Get user details by UID (used by the PDF generator)
+  Future<Map<String, dynamic>?> getUserDetails(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      if (doc.exists) return doc.data();
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Generates a professional PDF document with full center and appointment
   /// details. The [appointment] map should contain center fields (centerName,
   /// registrationNumber, address, city, state, pinCode, contactPerson,
@@ -402,6 +413,12 @@ class AppointmentService {
               infoRow('Email', appointment['contactEmail'] ?? ''),
               infoRow('Address', fullAddress),
               infoRow('Coordinates', locationStr),
+
+              // ---- User Details ----
+              sectionTitle('User Details'),
+              infoRow('Name', appointment['userName'] ?? ''),
+              infoRow('Email', appointment['userEmail'] ?? ''),
+              infoRow('Phone', appointment['userPhone'] ?? ''),
 
               // ---- Appointment Details ----
               sectionTitle('Appointment Details'),

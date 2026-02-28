@@ -350,6 +350,17 @@ class _AppointmentPageState extends State<AppointmentPage> {
     if (_selectedDate == null || _selectedTimeSlot == null) return;
 
     final center = widget.center;
+
+    // Fetch current user details for the PDF
+    Map<String, dynamic> userDetails = {};
+    try {
+      final uid = _appointmentService.currentUserId;
+      if (uid != null) {
+        final userDoc = await _appointmentService.getUserDetails(uid);
+        if (userDoc != null) userDetails = userDoc;
+      }
+    } catch (_) {}
+
     final appointmentData = {
       // Full center details
       'centerName': center['centreName'] ?? '',
@@ -363,6 +374,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
       'contactEmail': center['contactEmail'] ?? '',
       'latitude': center['latitude'],
       'longitude': center['longitude'],
+      // User details
+      'userName': userDetails['name'] ?? '',
+      'userEmail': userDetails['email'] ?? '',
+      'userPhone': userDetails['phone'] ?? '',
       // Appointment details
       'appointmentDate': _selectedDate!,
       'appointmentTime': _selectedTimeSlot!,
