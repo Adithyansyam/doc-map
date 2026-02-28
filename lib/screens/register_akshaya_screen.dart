@@ -160,7 +160,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: darkYellow,
+                              color: Colors.black,
                             ),
                           ),
                         ),
@@ -654,7 +654,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: darkYellow,
+            color: Colors.black,
           ),
           textAlign: TextAlign.center,
         ),
@@ -663,7 +663,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
           'Fill in the details below to register your centre',
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey[600],
+            color: Colors.black87,
           ),
           textAlign: TextAlign.center,
         ),
@@ -707,7 +707,7 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: darkYellow,
+                    color: Colors.black,
                   ),
                 ),
               ],
@@ -732,10 +732,10 @@ class _RegisterAkshayaScreenState extends State<RegisterAkshayaScreen> with Sing
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
-      style: const TextStyle(fontSize: 16),
+      style: const TextStyle(fontSize: 16, color: Colors.black),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.grey[600]),
+        labelStyle: const TextStyle(color: Colors.black54),
         prefixIcon: Icon(icon, color: primaryYellow),
         filled: true,
         fillColor: Colors.grey[50],

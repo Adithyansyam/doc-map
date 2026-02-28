@@ -80,7 +80,11 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
         (route) => false,
       );
     } on FirebaseAuthException catch (e) {
-      _showError(_getErrorMessage(e.code));
+      if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
+        _showUserNotFoundDialog();
+      } else {
+        _showError(_getErrorMessage(e.code));
+      }
     } catch (e) {
       _showError('An error occurred. Please try again.');
     } finally {
@@ -112,6 +116,49 @@ class LoginScreenState extends State<LoginScreen> with SingleTickerProviderState
         content: Text(message),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showUserNotFoundDialog() {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.person_off, color: Colors.red.shade400, size: 28),
+            const SizedBox(width: 10),
+            const Text(
+              'User Not Found',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+          ],
+        ),
+        content: const Text(
+          'No user with this email exists. Please check your email or sign up for a new account.',
+          style: TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SignUpScreen()),
+              );
+            },
+            child: Text('Sign Up', style: TextStyle(color: buttonColor)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: buttonColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
