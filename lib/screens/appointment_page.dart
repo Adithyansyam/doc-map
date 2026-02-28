@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+
+// PDF generation and printing packages
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+
 import '../services/appointment_service.dart';
 import 'center_details_screen.dart';
 
@@ -266,6 +272,29 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 ),
               ),
               const SizedBox(height: 24),
+              // download pdf button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _downloadAppointmentPdf,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueGrey,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Download PDF',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -307,6 +336,34 @@ class _AppointmentPageState extends State<AppointmentPage> {
       'Friday', 'Saturday', 'Sunday',
     ];
     return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  /// Creates a PDF document representing the appointment details and sends
+  /// it to the system print/layout dialog. The caller does not close any
+  /// dialogs so the user may download the file and then hit "Done".
+  Future<void> _downloadAppointmentPdf() async {
+    if (_selectedDate == null || _selectedTimeSlot == null) return;
+
+    // build a simple map containing the data we just booked so the service
+    // can create the document consistently with other parts of the app if
+    // we ever need to reuse it.
+    final appointmentData = {
+      'centerName': widget.center['centreName'] ?? '',
+      'centerAddress':
+          '${widget.center['address'] ?? ''}, ${widget.center['city'] ?? ''}, ${widget.center['state'] ?? ''}',
+      'centerPhone': widget.center['contactPhone'] ?? '',
+      'appointmentDate': _selectedDate!,
+      'appointmentTime': _selectedTimeSlot!,
+      'purpose': _purposeController.text.trim(),
+      'notes': _notesController.text.trim(),
+    };
+
+    try {
+      final bytes = await _appointmentService.createAppointmentPdf(appointmentData);
+      await Printing.layoutPdf(onLayout: (format) async => bytes);
+    } catch (e) {
+      _showErrorSnackBar('Failed to generate PDF: $e');
+    }
   }
 
   @override

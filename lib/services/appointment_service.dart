@@ -1,5 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+// PDF generation
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+
 import 'notification_service.dart';
 
 class AppointmentService {
@@ -287,5 +294,66 @@ class AppointmentService {
     } catch (e) {
       return null;
     }
+  }
+
+  /// Generates a PDF document for the given appointment data and returns the
+  /// bytes. The appointment map is expected to contain the same fields used
+  /// when booking (centerName, centerAddress, appointmentDate, etc.).
+  Future<Uint8List> createAppointmentPdf(Map<String, dynamic> appointment) async {
+    final pdf = pw.Document();
+
+    DateTime appointmentDate;
+    final rawDate = appointment['appointmentDate'];
+    if (rawDate is Timestamp) {
+      appointmentDate = rawDate.toDate();
+    } else if (rawDate is DateTime) {
+      appointmentDate = rawDate;
+    } else {
+      appointmentDate = DateTime.now();
+    }
+
+    String formatDate(DateTime date) {
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      ];
+      const days = [
+        'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+        'Friday', 'Saturday', 'Sunday',
+      ];
+      return '${days[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}, ${date.year}';
+    }
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        build: (pw.Context context) {
+          return pw.Padding(
+            padding: const pw.EdgeInsets.all(24),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('Appointment Confirmation',
+                    style: pw.TextStyle(
+                        fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 16),
+                pw.Text('Center: ${appointment['centerName'] ?? ''}'),
+                pw.Text('Address: ${appointment['centerAddress'] ?? ''}'),
+                pw.Text('Phone: ${appointment['centerPhone'] ?? ''}'),
+                pw.SizedBox(height: 12),
+                pw.Text('Appointment Date: ${formatDate(appointmentDate)}'),
+                pw.Text('Appointment Time: ${appointment['appointmentTime'] ?? ''}'),
+                pw.SizedBox(height: 12),
+                pw.Text('Purpose: ${appointment['purpose'] ?? ''}'),
+                if ((appointment['notes'] as String?)?.trim().isNotEmpty ?? false)
+                  pw.Text('Notes: ${appointment['notes']}'),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+
+    return pdf.save();
   }
 }
