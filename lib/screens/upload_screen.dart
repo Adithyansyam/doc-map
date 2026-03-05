@@ -23,7 +23,6 @@ class _UploadScreenState extends State<UploadScreen> {
 
   int _currentIndex = 3;
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
   final user = FirebaseAuth.instance.currentUser;
 
   PlatformFile? _selectedFile;
@@ -116,7 +115,6 @@ class _UploadScreenState extends State<UploadScreen> {
       // Save metadata to Firestore
       await FirebaseFirestore.instance.collection('uploads').add({
         'title': _titleController.text.trim(),
-        'description': _descriptionController.text.trim(),
         'fileName': _selectedFile!.name,
         'fileUrl': downloadUrl,
         'fileSize': _selectedFile!.size,
@@ -138,7 +136,6 @@ class _UploadScreenState extends State<UploadScreen> {
         setState(() {
           _selectedFile = null;
           _titleController.clear();
-          _descriptionController.clear();
           _isUploading = false;
           _uploadProgress = 0.0;
         });
@@ -163,7 +160,6 @@ class _UploadScreenState extends State<UploadScreen> {
   @override
   void dispose() {
     _titleController.dispose();
-    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -305,42 +301,6 @@ class _UploadScreenState extends State<UploadScreen> {
               controller: _titleController,
               decoration: InputDecoration(
                 hintText: 'Enter document title',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF1E88E5)),
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Description field
-            const Text(
-              'Description',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _descriptionController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: 'Enter document description (optional)',
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
