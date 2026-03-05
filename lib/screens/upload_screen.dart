@@ -16,7 +16,8 @@ class UploadScreen extends StatefulWidget {
   State<UploadScreen> createState() => _UploadScreenState();
 }
 
-class _UploadScreenState extends State<UploadScreen> {
+class _UploadScreenState extends State<UploadScreen>
+    with TickerProviderStateMixin {
   static const Color primaryYellow = Color(0xFFE8E45E);
   static const Color lightYellow = Color(0xFFF8F6F0);
   static const Color darkYellow = Color(0xFFB5A642);
@@ -29,6 +30,11 @@ class _UploadScreenState extends State<UploadScreen> {
   DateTime? _validityDate;
   bool _isUploading = false;
   double _uploadProgress = 0.0;
+
+  late AnimationController _pulseController;
+  late AnimationController _bounceController;
+  late Animation<double> _pulseAnimation;
+  late Animation<double> _bounceAnimation;
 
   void _onItemTapped(int index) {
     if (index == 0) {
@@ -172,14 +178,161 @@ class _UploadScreenState extends State<UploadScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _bounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 0.85, end: 1.15).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+    _bounceAnimation = Tween<double>(begin: 0, end: -14).animate(
+      CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
   void dispose() {
+    _pulseController.dispose();
+    _bounceController.dispose();
     _titleController.dispose();
     super.dispose();
   }
 
+  Widget _buildUploadingOverlay() {
+    return Container(
+      color: Colors.black.withValues(alpha: 0.6),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 40),
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 32,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Animated cloud icon with pulsing ring
+              AnimatedBuilder(
+                animation: Listenable.merge([_pulseAnimation, _bounceAnimation]),
+                builder: (context, child) {
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Outer pulse ring
+                      Transform.scale(
+                        scale: _pulseAnimation.value,
+                        child: Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF1E88E5).withValues(alpha: 0.12),
+                          ),
+                        ),
+                      ),
+                      // Inner ring
+                      Transform.scale(
+                        scale: _pulseAnimation.value * 0.85,
+                        child: Container(
+                          width: 70,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0xFF1E88E5).withValues(alpha: 0.18),
+                          ),
+                        ),
+                      ),
+                      // Bouncing cloud icon
+                      Transform.translate(
+                        offset: Offset(0, _bounceAnimation.value),
+                        child: const Icon(
+                          Icons.cloud_upload_rounded,
+                          size: 48,
+                          color: Color(0xFF1E88E5),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 28),
+              const Text(
+                'Uploading Document',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                _selectedFile?.name ?? '',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade500,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 24),
+              // Progress bar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: LinearProgressIndicator(
+                  value: _uploadProgress,
+                  backgroundColor: Colors.grey.shade200,
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1E88E5)),
+                  minHeight: 10,
+                ),
+              ),
+              const SizedBox(height: 12),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: Text(
+                  '${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                  key: ValueKey(_uploadProgress.toStringAsFixed(0)),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E88E5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Please wait, do not close the app',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade400,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Stack(
+      children: [
+    Scaffold(
       backgroundColor: lightYellow,
       appBar: AppBar(
         backgroundColor: lightYellow,
@@ -384,29 +537,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
             const SizedBox(height: 30),
 
-            // Upload progress
-            if (_isUploading) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: LinearProgressIndicator(
-                  value: _uploadProgress,
-                  backgroundColor: Colors.grey.shade200,
-                  valueColor:
-                      const AlwaysStoppedAnimation<Color>(Color(0xFF1E88E5)),
-                  minHeight: 8,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${(_uploadProgress * 100).toStringAsFixed(0)}% uploaded',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-            ],
+
 
             // Upload button
             SizedBox(
@@ -447,6 +578,10 @@ class _UploadScreenState extends State<UploadScreen> {
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
       ),
+    ),
+    // Full-screen uploading overlay
+    if (_isUploading) _buildUploadingOverlay(),
+      ],
     );
   }
 
