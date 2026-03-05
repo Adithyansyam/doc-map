@@ -5,6 +5,7 @@ import 'home_screen.dart';
 import 'my_centers_screen.dart';
 import 'profile_screen.dart';
 import 'document_view_screen.dart';
+import 'upload_screen.dart';
 
 class SearchDoc extends StatefulWidget {
   const SearchDoc({super.key});
@@ -52,6 +53,11 @@ class _SearchDocState extends State<SearchDoc> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MyCentersScreen()),
+      );
+    } else if (index == 3) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const UploadScreen()),
       );
     } else {
       setState(() {

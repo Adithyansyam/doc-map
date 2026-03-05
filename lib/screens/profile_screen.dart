@@ -7,6 +7,7 @@ import 'edit_profile.dart';
 import 'settings_screen.dart';
 import 'user_notifications_screen.dart';
 import '../services/notification_service.dart';
+import 'upload_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -264,6 +265,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (index == 0) {
             // Navigate back to home
             Navigator.pop(context);
+          } else if (index == 3) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const UploadScreen()),
+            );
           }
           // If index is 1 (Profile), we're already here
         },

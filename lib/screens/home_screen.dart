@@ -10,6 +10,7 @@ import 'search_doc.dart';
 import '../widgets/homepage_navbar.dart';
 import '../widgets/center_drawer.dart';
 import '../services/centre_service.dart';
+import 'upload_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -67,6 +68,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const SearchDoc()),
+      );
+    } else if (index == 3) {
+      // Navigate to Upload Screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UploadScreen()),
       );
     } else {
       setState(() {

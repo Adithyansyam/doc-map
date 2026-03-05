@@ -8,6 +8,7 @@ import '../widgets/homepage_navbar.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
 import 'search_doc.dart';
+import 'upload_screen.dart';
 import 'document_details_screen.dart';
 
 class MyCentersScreen extends StatefulWidget {
@@ -41,6 +42,12 @@ class _MyCentersScreenState extends State<MyCentersScreen> with SingleTickerProv
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const SearchDoc()),
+      );
+    } else if (index == 3) {
+      // Navigate to Upload Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const UploadScreen()),
       );
     } else {
       setState(() {

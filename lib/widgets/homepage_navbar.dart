@@ -81,6 +81,12 @@ class _HomePageNavBarState extends State<HomePageNavBar>
                     index: 2,
                     isSelected: widget.currentIndex == 2,
                   ),
+                  _buildNavItem(
+                    icon: Icons.upload_file,
+                    label: 'Upload',
+                    index: 3,
+                    isSelected: widget.currentIndex == 3,
+                  ),
                 ],
               ),
             ),
