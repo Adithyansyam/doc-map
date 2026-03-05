@@ -15,9 +15,7 @@ class UploadScreen extends StatefulWidget {
 
 class _UploadScreenState extends State<UploadScreen>
     with TickerProviderStateMixin {
-  static const Color primaryYellow = Color(0xFFE8E45E);
   static const Color lightYellow = Color(0xFFF8F6F0);
-  static const Color darkYellow = Color(0xFFB5A642);
 
   int _currentIndex = 3;
   final TextEditingController _titleController = TextEditingController();
@@ -25,8 +23,7 @@ class _UploadScreenState extends State<UploadScreen>
 
   PlatformFile? _selectedFile;
   DateTime? _validityDate;
-  bool _isUploading = false;
-  double _uploadProgress = 0.0;
+  bool _isSaving = false;
 
   late AnimationController _pulseController;
   late AnimationController _bounceController;
@@ -69,7 +66,7 @@ class _UploadScreenState extends State<UploadScreen>
     }
   }
 
-  Future<void> _uploadFile() async {
+  Future<void> _saveDocument() async {
     if (_selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -104,26 +101,21 @@ class _UploadScreenState extends State<UploadScreen>
     }
 
     setState(() {
-      _isUploading = true;
-      _uploadProgress = 0.0;
+      _isSaving = true;
     });
 
     try {
-      await _uploadService.uploadDocument(
-        selectedFile: _selectedFile!,
+      await _uploadService.saveDocument(
         title: _titleController.text.trim(),
+        fileName: _selectedFile!.name,
+        fileSize: _selectedFile!.size,
         validityDate: _validityDate!,
-        onProgress: (progress) {
-          setState(() {
-            _uploadProgress = progress;
-          });
-        },
       );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('File uploaded successfully!'),
+            content: const Text('Document saved successfully!'),
             backgroundColor: Colors.green.shade400,
             behavior: SnackBarBehavior.floating,
           ),
@@ -134,22 +126,20 @@ class _UploadScreenState extends State<UploadScreen>
           _selectedFile = null;
           _titleController.clear();
           _validityDate = null;
-          _isUploading = false;
-          _uploadProgress = 0.0;
+          _isSaving = false;
         });
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Upload failed: ${e.toString()}'),
+            content: Text('Save failed: ${e.toString()}'),
             backgroundColor: Colors.red.shade400,
             behavior: SnackBarBehavior.floating,
           ),
         );
         setState(() {
-          _isUploading = false;
-          _uploadProgress = 0.0;
+          _isSaving = false;
         });
       }
     }
@@ -182,7 +172,7 @@ class _UploadScreenState extends State<UploadScreen>
     super.dispose();
   }
 
-  Widget _buildUploadingOverlay() {
+  Widget _buildSavingOverlay() {
     return Container(
       color: Colors.black.withValues(alpha: 0.6),
       child: Center(
@@ -203,7 +193,7 @@ class _UploadScreenState extends State<UploadScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Animated cloud icon with pulsing ring
+              // Animated icon with pulsing ring
               AnimatedBuilder(
                 animation: Listenable.merge([_pulseAnimation, _bounceAnimation]),
                 builder: (context, child) {
@@ -234,11 +224,11 @@ class _UploadScreenState extends State<UploadScreen>
                           ),
                         ),
                       ),
-                      // Bouncing cloud icon
+                      // Bouncing icon
                       Transform.translate(
                         offset: Offset(0, _bounceAnimation.value),
                         child: const Icon(
-                          Icons.cloud_upload_rounded,
+                          Icons.save_rounded,
                           size: 48,
                           color: Color(0xFF1E88E5),
                         ),
@@ -249,7 +239,7 @@ class _UploadScreenState extends State<UploadScreen>
               ),
               const SizedBox(height: 28),
               const Text(
-                'Uploading Document',
+                'Saving Document',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -268,32 +258,17 @@ class _UploadScreenState extends State<UploadScreen>
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 24),
-              // Progress bar
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: LinearProgressIndicator(
-                  value: _uploadProgress,
-                  backgroundColor: Colors.grey.shade200,
-                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1E88E5)),
-                  minHeight: 10,
+              const SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  color: Color(0xFF1E88E5),
+                  strokeWidth: 2.5,
                 ),
               ),
               const SizedBox(height: 12),
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                child: Text(
-                  '${(_uploadProgress * 100).toStringAsFixed(0)}%',
-                  key: ValueKey(_uploadProgress.toStringAsFixed(0)),
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E88E5),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 4),
               Text(
-                'Please wait, do not close the app',
+                'Please wait...',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey.shade400,
@@ -310,255 +285,253 @@ class _UploadScreenState extends State<UploadScreen>
   Widget build(BuildContext context) {
     return Stack(
       children: [
-    Scaffold(
-      backgroundColor: lightYellow,
-      appBar: AppBar(
-        backgroundColor: lightYellow,
-        elevation: 0,
-        title: const Text(
-          'Upload Document',
-          style: TextStyle(
-            color: Colors.black87,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+        Scaffold(
+          backgroundColor: lightYellow,
+          appBar: AppBar(
+            backgroundColor: lightYellow,
+            elevation: 0,
+            title: const Text(
+              'Upload Document',
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            centerTitle: true,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // File picker area
-            GestureDetector(
-              onTap: _isUploading ? null : _pickFile,
-              child: Container(
-                width: double.infinity,
-                height: 180,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _selectedFile != null
-                        ? const Color(0xFF1E88E5)
-                        : Colors.grey.shade300,
-                    width: 2,
-                    strokeAlign: BorderSide.strokeAlignCenter,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // File picker area
+                GestureDetector(
+                  onTap: _isSaving ? null : _pickFile,
+                  child: Container(
+                    width: double.infinity,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: _selectedFile != null
+                            ? const Color(0xFF1E88E5)
+                            : Colors.grey.shade300,
+                        width: 2,
+                        strokeAlign: BorderSide.strokeAlignCenter,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: _selectedFile != null
-                    ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _getFileIcon(_selectedFile!.extension ?? ''),
-                            size: 48,
-                            color: const Color(0xFF1E88E5),
-                          ),
-                          const SizedBox(height: 12),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Text(
-                              _selectedFile!.name,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                    child: _selectedFile != null
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _getFileIcon(_selectedFile!.extension ?? ''),
+                                size: 48,
+                                color: const Color(0xFF1E88E5),
                               ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                              const SizedBox(height: 12),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                child: Text(
+                                  _selectedFile!.name,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black87,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _formatFileSize(_selectedFile!.size),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Tap to change file',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue.shade400,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.description_outlined,
+                                size: 48,
+                                color: Colors.grey.shade400,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Tap to select a document',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'PDF, DOC, DOCX, JPG, PNG',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade400,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Title field
+                const Text(
+                  'Title',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _titleController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter document title',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: Color(0xFF1E88E5)),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // Validity Date field
+                const Text(
+                  'Validity Date Ends On',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: _isSaving ? null : _selectValidityDate,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _validityDate != null
+                              ? '${_validityDate!.day}-${_validityDate!.month}-${_validityDate!.year}'
+                              : 'Select date',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: _validityDate != null
+                                ? Colors.black87
+                                : Colors.grey.shade600,
+                          ),
+                        ),
+                        Icon(
+                          Icons.calendar_today,
+                          color: _validityDate != null
+                              ? const Color(0xFF1E88E5)
+                              : Colors.grey.shade400,
+                          size: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                // Save button
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isSaving ? null : _saveDocument,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1E88E5),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: _isSaving
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _formatFileSize(_selectedFile!.size),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Tap to change file',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.blue.shade400,
-                            ),
-                          ),
-                        ],
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.cloud_upload_outlined,
-                            size: 48,
-                            color: Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Tap to select a file',
+                          )
+                        : const Text(
+                            'Upload Document',
                             style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'PDF, DOC, DOCX, JPG, PNG',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade400,
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Title field
-            const Text(
-              'Title',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                hintText: 'Enter document title',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF1E88E5)),
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Validity Date field
-            const Text(
-              'Validity Date Ends On',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: _isUploading ? null : _selectValidityDate,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _validityDate != null
-                          ? '${_validityDate!.day}-${_validityDate!.month}-${_validityDate!.year}'
-                          : 'Select date',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _validityDate != null
-                            ? Colors.black87
-                            : Colors.grey.shade600,
-                      ),
-                    ),
-                    Icon(
-                      Icons.calendar_today,
-                      color: _validityDate != null
-                          ? const Color(0xFF1E88E5)
-                          : Colors.grey.shade400,
-                      size: 20,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-
-
-            // Upload button
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _isUploading ? null : _uploadFile,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E88E5),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
                   ),
-                  elevation: 2,
                 ),
-                child: _isUploading
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.5,
-                        ),
-                      )
-                    : const Text(
-                        'Upload Document',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              ),
+              ],
             ),
-          ],
+          ),
+          bottomNavigationBar: HomePageNavBar(
+            currentIndex: _currentIndex,
+            onTap: _onItemTapped,
+          ),
         ),
-      ),
-      bottomNavigationBar: HomePageNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onItemTapped,
-      ),
-    ),
-    // Full-screen uploading overlay
-    if (_isUploading) _buildUploadingOverlay(),
+        // Full-screen saving overlay
+        if (_isSaving) _buildSavingOverlay(),
       ],
     );
   }

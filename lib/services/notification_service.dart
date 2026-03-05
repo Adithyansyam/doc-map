@@ -343,4 +343,45 @@ class NotificationService {
       debugPrint('Failed to create center status notification: $e');
     }
   }
+
+  // Create notification for document validity expiry
+  Future<void> createValidityExpiryNotification({
+    required String userId,
+    required String documentTitle,
+    required String documentId,
+    required DateTime validityDate,
+  }) async {
+    try {
+      final now = DateTime.now();
+      final daysLeft = validityDate.difference(now).inDays;
+
+      String title;
+      String message;
+
+      if (daysLeft < 0) {
+        title = 'Document Expired ⚠️';
+        message = 'Your document "$documentTitle" validity has expired on ${_formatDate(validityDate)}.';
+      } else if (daysLeft == 0) {
+        title = 'Document Expiring Today ⚠️';
+        message = 'Your document "$documentTitle" validity expires today (${_formatDate(validityDate)}).';
+      } else {
+        title = 'Document Validity Reminder 📄';
+        message = 'Your document "$documentTitle" validity expires on ${_formatDate(validityDate)} ($daysLeft days remaining).';
+      }
+
+      await _notificationsCollection.add({
+        'userId': userId,
+        'type': 'validity_expiry',
+        'title': title,
+        'message': message,
+        'documentId': documentId,
+        'documentTitle': documentTitle,
+        'validityDate': Timestamp.fromDate(validityDate),
+        'isRead': false,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      debugPrint('Failed to create validity expiry notification: $e');
+    }
+  }
 }

@@ -159,6 +159,10 @@ class _UserNotificationsScreenState extends State<UserNotificationsScreen> {
     if (type == 'center_status') {
       return _buildCenterStatusNotificationCard(notification, isRead);
     }
+
+    if (type == 'validity_expiry') {
+      return _buildValidityExpiryNotificationCard(notification, isRead);
+    }
     
     // Default: appointment status notification
     final String status = notification['appointmentStatus'] ?? 'pending';
@@ -479,6 +483,175 @@ class _UserNotificationsScreenState extends State<UserNotificationsScreen> {
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                         color: isApproved ? Colors.green : Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              Icon(Icons.access_time, size: 14, color: Colors.grey[500]),
+                              const SizedBox(width: 4),
+                              Text(
+                                timeAgo,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildValidityExpiryNotificationCard(Map<String, dynamic> notification, bool isRead) {
+    DateTime createdAt = DateTime.now();
+    if (notification['createdAt'] != null) {
+      createdAt = (notification['createdAt'] as Timestamp).toDate();
+    }
+    final timeAgo = _getTimeAgo(createdAt);
+
+    // Check if expired or still upcoming
+    DateTime? validityDate;
+    if (notification['validityDate'] != null) {
+      validityDate = (notification['validityDate'] as Timestamp).toDate();
+    }
+    final bool isExpired = validityDate != null && validityDate.isBefore(DateTime.now());
+
+    return Dismissible(
+      key: Key(notification['id']),
+      background: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      direction: DismissDirection.endToStart,
+      onDismissed: (direction) {
+        _notificationService.deleteUserNotification(notification['id']);
+      },
+      child: GestureDetector(
+        onTap: () {
+          if (!isRead) {
+            _notificationService.markUserNotificationAsRead(notification['id']);
+          }
+        },
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: isRead ? Colors.white : Colors.orange.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isRead ? Colors.grey.shade300 : Colors.orange.withValues(alpha: 0.4),
+              width: isRead ? 1 : 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: isExpired
+                              ? [Colors.red, Colors.red.shade700]
+                              : [Colors.orange, Colors.orange.shade700],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        isExpired ? Icons.warning_rounded : Icons.calendar_month,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  notification['title'] ?? 'Validity Reminder',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: isExpired ? Colors.red.shade700 : Colors.orange.shade800,
+                                  ),
+                                ),
+                              ),
+                              if (!isRead)
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            notification['message'] ?? '',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isExpired
+                                      ? Colors.red.withValues(alpha: 0.1)
+                                      : Colors.orange.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isExpired ? Icons.error : Icons.schedule,
+                                      size: 14,
+                                      color: isExpired ? Colors.red : Colors.orange,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      isExpired ? 'Expired' : 'Expiring Soon',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: isExpired ? Colors.red : Colors.orange,
                                       ),
                                     ),
                                   ],

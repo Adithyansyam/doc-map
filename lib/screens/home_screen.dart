@@ -10,6 +10,7 @@ import 'search_doc.dart';
 import '../widgets/homepage_navbar.dart';
 import '../widgets/center_drawer.dart';
 import '../services/centre_service.dart';
+import '../services/upload_service.dart';
 import 'upload_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -34,6 +35,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Check for expiring document validity on app open
+    UploadService().checkValidityExpiry();
     // Show location permission dialog when app opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _showLocationPermissionDialog();
