@@ -97,6 +97,24 @@ service cloud.firestore {
                        resource.data.createdBy == request.auth.uid;
     }
     
+    // Uploads collection - users can upload and manage their own uploads
+    match /uploads/{uploadId} {
+      // All authenticated users can read uploads
+      allow read: if request.auth != null;
+      
+      // Authenticated users can create uploads (must set uploadedBy to their uid)
+      allow create: if request.auth != null && 
+                       request.resource.data.uploadedBy == request.auth.uid;
+      
+      // Only the uploader can update their own uploads
+      allow update: if request.auth != null && 
+                       resource.data.uploadedBy == request.auth.uid;
+      
+      // Only the uploader can delete their own uploads
+      allow delete: if request.auth != null && 
+                       resource.data.uploadedBy == request.auth.uid;
+    }
+
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;

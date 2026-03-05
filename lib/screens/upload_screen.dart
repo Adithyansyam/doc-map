@@ -1,9 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/upload_service.dart';
 import '../widgets/homepage_navbar.dart';
 import 'home_screen.dart';
 import 'my_centers_screen.dart';
@@ -24,7 +21,7 @@ class _UploadScreenState extends State<UploadScreen>
 
   int _currentIndex = 3;
   final TextEditingController _titleController = TextEditingController();
-  final user = FirebaseAuth.instance.currentUser;
+  final UploadService _uploadService = UploadService();
 
   PlatformFile? _selectedFile;
   DateTime? _validityDate;
@@ -112,35 +109,16 @@ class _UploadScreenState extends State<UploadScreen>
     });
 
     try {
-      final file = File(_selectedFile!.path!);
-      final fileName =
-          '${DateTime.now().millisecondsSinceEpoch}_${_selectedFile!.name}';
-      final storageRef =
-          FirebaseStorage.instance.ref().child('uploads/${user!.uid}/$fileName');
-
-      final uploadTask = storageRef.putFile(file);
-
-      uploadTask.snapshotEvents.listen((event) {
-        setState(() {
-          _uploadProgress =
-              event.bytesTransferred.toDouble() / event.totalBytes.toDouble();
-        });
-      });
-
-      await uploadTask;
-      final downloadUrl = await storageRef.getDownloadURL();
-
-      // Save metadata to Firestore
-      await FirebaseFirestore.instance.collection('uploads').add({
-        'title': _titleController.text.trim(),
-        'fileName': _selectedFile!.name,
-        'fileUrl': downloadUrl,
-        'fileSize': _selectedFile!.size,
-        'validityDateEndsOn': _validityDate,
-        'uploadedBy': user!.uid,
-        'uploadedByEmail': user!.email,
-        'uploadedAt': FieldValue.serverTimestamp(),
-      });
+      await _uploadService.uploadDocument(
+        selectedFile: _selectedFile!,
+        title: _titleController.text.trim(),
+        validityDate: _validityDate!,
+        onProgress: (progress) {
+          setState(() {
+            _uploadProgress = progress;
+          });
+        },
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
