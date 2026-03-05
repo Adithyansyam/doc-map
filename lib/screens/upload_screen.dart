@@ -26,6 +26,7 @@ class _UploadScreenState extends State<UploadScreen> {
   final user = FirebaseAuth.instance.currentUser;
 
   PlatformFile? _selectedFile;
+  DateTime? _validityDate;
   bool _isUploading = false;
   double _uploadProgress = 0.0;
 
@@ -88,6 +89,17 @@ class _UploadScreenState extends State<UploadScreen> {
       return;
     }
 
+    if (_validityDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please select a validity date'),
+          backgroundColor: Colors.red.shade400,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isUploading = true;
       _uploadProgress = 0.0;
@@ -118,6 +130,7 @@ class _UploadScreenState extends State<UploadScreen> {
         'fileName': _selectedFile!.name,
         'fileUrl': downloadUrl,
         'fileSize': _selectedFile!.size,
+        'validityDateEndsOn': _validityDate,
         'uploadedBy': user!.uid,
         'uploadedByEmail': user!.email,
         'uploadedAt': FieldValue.serverTimestamp(),
@@ -136,6 +149,7 @@ class _UploadScreenState extends State<UploadScreen> {
         setState(() {
           _selectedFile = null;
           _titleController.clear();
+          _validityDate = null;
           _isUploading = false;
           _uploadProgress = 0.0;
         });
@@ -320,6 +334,54 @@ class _UploadScreenState extends State<UploadScreen> {
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            // Validity Date field
+            const Text(
+              'Validity Date Ends On',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: _isUploading ? null : _selectValidityDate,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _validityDate != null
+                          ? '${_validityDate!.day}-${_validityDate!.month}-${_validityDate!.year}'
+                          : 'Select date',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: _validityDate != null
+                            ? Colors.black87
+                            : Colors.grey.shade600,
+                      ),
+                    ),
+                    Icon(
+                      Icons.calendar_today,
+                      color: _validityDate != null
+                          ? const Color(0xFF1E88E5)
+                          : Colors.grey.shade400,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             const SizedBox(height: 30),
 
             // Upload progress
@@ -386,6 +448,34 @@ class _UploadScreenState extends State<UploadScreen> {
         onTap: _onItemTapped,
       ),
     );
+  }
+
+  Future<void> _selectValidityDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _validityDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF1E88E5),
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black87,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != _validityDate) {
+      setState(() {
+        _validityDate = picked;
+      });
+    }
   }
 
   IconData _getFileIcon(String extension) {
