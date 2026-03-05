@@ -23,7 +23,7 @@ class UploadService {
     if (user == null) throw Exception('User not authenticated');
 
     // Save metadata to Firestore
-    final docRef = await _uploadsCollection.add({
+    await _uploadsCollection.add({
       'title': title,
       'fileName': fileName,
       'fileSize': fileSize,
@@ -32,14 +32,6 @@ class UploadService {
       'uploadedByEmail': user.email,
       'uploadedAt': FieldValue.serverTimestamp(),
     });
-
-    // Create a validity expiry notification
-    await _notificationService.createValidityExpiryNotification(
-      userId: user.uid,
-      documentTitle: title,
-      documentId: docRef.id,
-      validityDate: validityDate,
-    );
   }
 
   /// Get all uploads for the current user as a stream.
@@ -100,9 +92,9 @@ class UploadService {
         final validityDate = validityTimestamp.toDate();
         final daysUntilExpiry = validityDate.difference(now).inDays;
 
-        // If validity has expired or expires within 7 days,
+        // If validity has expired or expires within 2 days,
         // and notification hasn't been sent yet
-        if (daysUntilExpiry <= 7 && data['expiryNotified'] != true) {
+        if (daysUntilExpiry <= 2 && data['expiryNotified'] != true) {
           await _notificationService.createValidityExpiryNotification(
             userId: user.uid,
             documentTitle: data['title'] ?? 'Untitled Document',
